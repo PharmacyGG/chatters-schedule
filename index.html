@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chatters Team Schedule</title>
+<style>
+  :root {
+    --moreno:#DCE8F5; --moreno-txt:#1F4D7A;
+    --aji:#DFF0D8;    --aji-txt:#2D6A2D;
+    --ace:#FCE5CC;    --ace-txt:#8A4B0F;
+    --carlo:#F8D7DA;  --carlo-txt:#8A1F2B;
+    --vac:#E4DAF5;    --vac-txt:#4B2E83;
+    --company:#D9D9D9;--company-txt:#333;
+    --off:#F2E8D5;    --off-txt:#7A5A1F;
+    --pay:#2E8B57;    --pay-txt:#FFF;
+    --comm:#F5E6C4;   --comm-txt:#6B4B00;
+    --border:#D6D6D6;
+    --hdr:#F7F9F4;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; padding: 16px; background:#FAFAFA; color:#222;}
+  header { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+  header h1 { font-size:20px; margin:0; }
+  button { padding:6px 12px; border:1px solid #CCC; background:#FFF; border-radius:4px; cursor:pointer; font-size:13px;}
+  button:hover { background:#F0F0F0;}
+  button.primary { background:#2E5A87; color:#FFF; border-color:#2E5A87;}
+  button.primary:hover { background:#1F3F66;}
+  select { padding:5px 8px; border:1px solid #CCC; border-radius:4px; font-size:13px;}
+  .pay-banner { background:var(--hdr); padding:8px 12px; border:1px solid var(--border); border-radius:4px; font-size:12px; margin-bottom:10px;}
+  .legend { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;}
+  .pill { padding:3px 8px; border-radius:3px; font-size:11px; font-weight:600; display:inline-block;}
+  .pill.moreno{background:var(--moreno);color:var(--moreno-txt);}
+  .pill.aji{background:var(--aji);color:var(--aji-txt);}
+  .pill.ace{background:var(--ace);color:var(--ace-txt);}
+  .pill.carlo{background:var(--carlo);color:var(--carlo-txt);}
+  .pill.vac{background:var(--vac);color:var(--vac-txt);}
+  .pill.company{background:var(--company);color:var(--company-txt);}
+  .pill.off{background:var(--off);color:var(--off-txt);}
+  .pill.pay{background:var(--pay);color:var(--pay-txt);}
+  .pill.comm{background:var(--comm);color:var(--comm-txt);}
+  .calendars { display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .calendars.single { grid-template-columns:1fr;}
+  .cal { background:#FFF; border:1px solid var(--border); border-radius:4px; overflow:hidden;}
+  .cal h2 { margin:0; padding:10px 12px; font-size:14px; background:var(--hdr); border-bottom:1px solid var(--border);}
+  .cal h2 small { font-weight:normal; color:#666;}
+  table { width:100%; border-collapse:collapse; table-layout:fixed;}
+  th { background:#555; color:#FFF; font-weight:600; padding:6px 4px; font-size:11px;}
+  td { border:1px solid var(--border); vertical-align:top; padding:4px; height:90px; font-size:10px; cursor:pointer; position:relative;}
+  td.empty { background:#FAFAFA; cursor:default;}
+  td:hover:not(.empty) { background:#F5FAFF;}
+  td .date { font-weight:600; font-size:11px; color:#555; margin-bottom:3px;}
+  td.empty .date { color:#BBB;}
+  td .stack { display:flex; flex-direction:column; gap:2px;}
+  td .stack .pill { font-size:9px; padding:2px 5px; line-height:1.3;}
+  .vac-bg { background:#F5F1FB;}
+  @media print {
+    body { background:#FFF; padding:0;}
+    header, .toolbar, .no-print { display:none !important;}
+    .calendars { grid-template-columns:1fr; page-break-inside:avoid;}
+    .cal { page-break-after:always; border:none;}
+    td { height:auto; min-height:70px;}
+  }
+  /* modal */
+  .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,0.35); display:none; align-items:center; justify-content:center; z-index:10;}
+  .modal-bg.show { display:flex;}
+  .modal { background:#FFF; padding:18px; border-radius:6px; width:320px; box-shadow:0 8px 24px rgba(0,0,0,0.2);}
+  .modal h3 { margin:0 0 10px; font-size:15px;}
+  .modal .row { display:flex; gap:8px; align-items:center; margin-bottom:8px;}
+  .modal .row label { flex:0 0 60px; font-size:12px; font-weight:600;}
+  .modal .row select { flex:1;}
+  .modal .actions { display:flex; justify-content:space-between; margin-top:14px;}
+</style>
+</head>
+<body>
+<header class="no-print">
+  <h1>Chatters Team Schedule</h1>
+  <button id="prevMonth">&larr;</button>
+  <span id="monthLabel" style="font-weight:600; min-width:140px; text-align:center;"></span>
+  <button id="nextMonth">&rarr;</button>
+  <select id="viewMode">
+    <option value="both">PHT + MST</option>
+    <option value="pht">PHT only</option>
+    <option value="mst">MST only</option>
+  </select>
+  <button class="primary" onclick="window.print()">Export PDF (Print)</button>
+  <button onclick="resetMonth()">Reset month</button>
+  <button id="autoSaveBtn" onclick="connectAutoSave()">🔒 Connect auto-save file</button>
+  <span id="autoSaveStatus" style="font-size:12px; color:#666;"></span>
+  <button onclick="exportData()">Download backup</button>
+  <button onclick="document.getElementById('importFile').click()">Import data</button>
+  <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+</header>
+
+<div class="pay-banner" id="payBanner"></div>
+
+<div class="legend no-print">
+  <span class="pill moreno">Moreno 4pm–12am PHT</span>
+  <span class="pill aji">Aji 12am–8am PHT</span>
+  <span class="pill ace">Ace 8am–4pm PHT</span>
+  <span class="pill carlo">Carlo (floater)</span>
+  <span class="pill vac">Vacation</span>
+  <span class="pill company">Company cover</span>
+  <span class="pill off">Day off</span>
+  <span class="pill pay">$$$ Pay Day</span>
+  <span class="pill comm">Commission paid</span>
+  <span style="font-size:11px; color:#666; margin-left:auto;">Click any day cell to edit</span>
+</div>
+
+<div class="calendars" id="calendars"></div>
+
+<!-- edit modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3 id="modalTitle">Edit day</h3>
+    <div class="row">
+      <label>Moreno</label>
+      <select id="mStatus">
+        <option value="work">Works 4pm–12am</option>
+        <option value="off">Off — Carlo covers</option>
+        <option value="off-company">Off — Company cover</option>
+        <option value="vac">Vacation — Carlo covers</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>Aji</label>
+      <select id="aStatus">
+        <option value="work">Works 12am–8am</option>
+        <option value="off">Off — Carlo covers</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>Ace</label>
+      <select id="cStatus">
+        <option value="work">Works 8am–4pm</option>
+        <option value="off">Off — Carlo covers</option>
+      </select>
+    </div>
+    <div class="actions">
+      <button onclick="closeModal()">Cancel</button>
+      <div>
+        <button onclick="clearDay()">Reset to default</button>
+        <button class="primary" onclick="saveDay()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'chatters_schedule_v2';
+const PAY_ANCHOR = '2026-04-23'; // known pay date; biweekly forward & back
+const PROJECT_START = '2026-04-10'; // first PHT working day; earlier cells render blank
+
+// Default rotation: off-days by weekday (0=Sun..6=Sat)
+const MORENO_OFF_DOW = 0; // Sunday
+const AJI_OFF_DOW    = 2; // Tuesday
+const ACE_OFF_DOW    = 4; // Thursday
+
+let state = loadState();
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  const today = new Date();
+  return {
+    year: today.getFullYear(),
+    month: today.getMonth()+1,
+    overrides: {} // key 'YYYY-MM-DD' -> { m:'work|off|off-company|vac', a:'work|off', c:'work|off' }
+  };
+}
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  autoSaveToFile();
+}
+
+// ---- Auto-save to file (File System Access API) ----
+let fileHandle = null;
+const IDB_NAME = 'chatters_dashboard';
+const IDB_STORE = 'handles';
+
+function idb(mode) {
+  return new Promise((res, rej)=>{
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
+    req.onsuccess = () => {
+      const tx = req.result.transaction(IDB_STORE, mode);
+      res(tx.objectStore(IDB_STORE));
+    };
+    req.onerror = () => rej(req.error);
+  });
+}
+async function idbGet(key){ const s = await idb('readonly'); return new Promise((r)=>{ const rq = s.get(key); rq.onsuccess=()=>r(rq.result); }); }
+async function idbSet(key,val){ const s = await idb('readwrite'); return new Promise((r)=>{ const rq = s.put(val,key); rq.onsuccess=()=>r(); }); }
+async function idbDel(key){ const s = await idb('readwrite'); return new Promise((r)=>{ const rq = s.delete(key); rq.onsuccess=()=>r(); }); }
+
+function setAutoSaveStatus(msg, color) {
+  const el = document.getElementById('autoSaveStatus');
+  if (el) { el.textContent = msg; el.style.color = color || '#666'; }
+}
+
+async function connectAutoSave() {
+  if (!window.showSaveFilePicker) {
+    alert('Auto-save requires Chrome, Edge, or another Chromium-based browser. Use "Download backup" instead.');
+    return;
+  }
+  try {
+    const handle = await window.showSaveFilePicker({
+      suggestedName: 'chatters_schedule.json',
+      types: [{ description:'JSON', accept:{'application/json':['.json']}}]
+    });
+    fileHandle = handle;
+    await idbSet('fileHandle', handle);
+    await writeToFile();
+    setAutoSaveStatus('✓ Auto-saving to ' + handle.name, '#2E8B57');
+    document.getElementById('autoSaveBtn').textContent = '🔓 Change auto-save file';
+  } catch(e) { if (e.name!=='AbortError') alert('Could not connect: '+e.message); }
+}
+
+async function verifyPermission(handle) {
+  const opts = { mode:'readwrite' };
+  if ((await handle.queryPermission(opts)) === 'granted') return true;
+  if ((await handle.requestPermission(opts)) === 'granted') return true;
+  return false;
+}
+
+async function writeToFile() {
+  if (!fileHandle) return;
+  try {
+    if (!(await verifyPermission(fileHandle))) {
+      setAutoSaveStatus('⚠ Permission denied — click "Change auto-save file" to reconnect', '#B33');
+      return;
+    }
+    const writable = await fileHandle.createWritable();
+    await writable.write(JSON.stringify(state, null, 2));
+    await writable.close();
+    setAutoSaveStatus('✓ Saved ' + new Date().toLocaleTimeString() + ' to ' + fileHandle.name, '#2E8B57');
+  } catch(e) { setAutoSaveStatus('⚠ Save failed: ' + e.message, '#B33'); }
+}
+
+let saveTimer = null;
+function autoSaveToFile() {
+  if (!fileHandle) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(writeToFile, 300); // debounce rapid edits
+}
+
+async function restoreAutoSaveHandle() {
+  if (!window.showSaveFilePicker) {
+    setAutoSaveStatus('Auto-save unavailable in this browser');
+    document.getElementById('autoSaveBtn').style.display = 'none';
+    return;
+  }
+  try {
+    const handle = await idbGet('fileHandle');
+    if (handle) {
+      fileHandle = handle;
+      const ok = (await handle.queryPermission({mode:'readwrite'})) === 'granted';
+      if (ok) {
+        setAutoSaveStatus('✓ Auto-saving to ' + handle.name, '#2E8B57');
+      } else {
+        setAutoSaveStatus('⚠ Click "Change auto-save file" to re-grant permission', '#B33');
+      }
+      document.getElementById('autoSaveBtn').textContent = '🔓 Change auto-save file';
+    } else {
+      setAutoSaveStatus('Not connected — edits save locally only');
+    }
+  } catch(e) { setAutoSaveStatus('Not connected — edits save locally only'); }
+}
+
+function fmtDate(y,m,d){ return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+function addDays(dateStr, n){ const d = new Date(dateStr+'T00:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+function daysInMonth(y,m){ return new Date(y,m,0).getDate(); }
+function monthName(m){ return ['January','February','March','April','May','June','July','August','September','October','November','December'][m-1]; }
+
+function defaultForDate(y,m,d) {
+  const dow = new Date(y,m-1,d).getDay();
+  return {
+    m: dow===MORENO_OFF_DOW ? 'off' : 'work',
+    a: dow===AJI_OFF_DOW    ? 'off' : 'work',
+    c: dow===ACE_OFF_DOW    ? 'off' : 'work',
+  };
+}
+
+function stateForDate(dateStr) {
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const def = defaultForDate(y,m,d);
+  const ov = state.overrides[dateStr] || {};
+  return { m: ov.m ?? def.m, a: ov.a ?? def.a, c: ov.c ?? def.c };
+}
+
+// PHT cell shifts for a given PHT date
+function phtShifts(dateStr) {
+  const s = stateForDate(dateStr);
+  const out = [];
+  // Moreno
+  if (s.m==='work') out.push(['Moreno 4pm–12am','moreno']);
+  else if (s.m==='vac') out.push(['Moreno — vacation','vac'],['Carlo covers 4pm–12am','carlo']);
+  else if (s.m==='off-company') out.push(['Company cover 4pm–12am','company'],['Moreno — off','off']);
+  else out.push(['Carlo — 4pm–12am','carlo'],['Moreno — off','off']);
+  // Aji
+  if (s.a==='work') out.push(['Aji 12am–8am','aji']);
+  else out.push(['Carlo — 12am–8am','carlo'],['Aji — off','off']);
+  // Ace
+  if (s.c==='work') out.push(['Ace 8am–4pm','ace']);
+  else out.push(['Carlo — 8am–4pm','carlo'],['Ace — off','off']);
+  return { pills: out, vac: s.m==='vac' };
+}
+
+// MST cell shifts for MST date D:
+//   Moreno from PHT date D
+//   Aji/Ace from PHT date D+1
+function mstShifts(dateStr) {
+  const morenoPHT = stateForDate(dateStr);
+  const nextPHT   = stateForDate(addDays(dateStr,1));
+  const out = [];
+  if (morenoPHT.m==='work') out.push(['Moreno 1am–9am','moreno']);
+  else if (morenoPHT.m==='vac') out.push(['Moreno — vacation','vac'],['Carlo covers 1am–9am','carlo']);
+  else if (morenoPHT.m==='off-company') out.push(['Company cover 1am–9am','company'],['Moreno — off','off']);
+  else out.push(['Carlo — 1am–9am','carlo'],['Moreno — off','off']);
+  if (nextPHT.a==='work') out.push(['Aji 9am–5pm','aji']);
+  else out.push(['Carlo — 9am–5pm','carlo'],['Aji — off','off']);
+  if (nextPHT.c==='work') out.push(['Ace 5pm–1am','ace']);
+  else out.push(['Carlo — 5pm–1am','carlo'],['Ace — off','off']);
+  return { pills: out, vac: morenoPHT.m==='vac' };
+}
+
+function isPayDay(dateStr) {
+  const diffDays = Math.round((new Date(dateStr) - new Date(PAY_ANCHOR)) / 86400000);
+  return diffDays % 14 === 0;
+}
+function payPeriodFor(dateStr) {
+  const diffDays = Math.round((new Date(dateStr) - new Date(PAY_ANCHOR)) / 86400000);
+  const periodsFromAnchor = Math.floor(diffDays/14);
+  const payDate = addDays(PAY_ANCHOR, periodsFromAnchor*14 + (diffDays%14===0 ? 0 : 14));
+  const periodEnd = addDays(payDate, -4);    // pay day is 4 days after period end (matches historical cadence)
+  const periodStart = addDays(periodEnd, -13);
+  return { payDate, periodStart, periodEnd };
+}
+
+function buildCalendar(tz) {
+  const y = state.year, m = state.month;
+  const first = new Date(y, m-1, 1);
+  const startDow = first.getDay(); // Sunday=0
+  const total = daysInMonth(y,m);
+  let html = `<table><thead><tr>` +
+    ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map(d=>`<th>${d}</th>`).join('') +
+    `</tr></thead><tbody>`;
+  let day = 1, row = 0, dow = startDow;
+  html += '<tr>';
+  for (let i=0;i<startDow;i++) html += '<td class="empty"></td>';
+  // Earliest visible cell is PROJECT_START for both calendars (shifts before this weren't worked).
+  const earliestVisible = PROJECT_START;
+  while (day <= total) {
+    const dateStr = fmtDate(y,m,day);
+    const beforeStart = dateStr < earliestVisible;
+    if (beforeStart) {
+      html += `<td class="empty"><div class="date">${day}</div></td>`;
+    } else {
+      const data = tz==='pht' ? phtShifts(dateStr) : mstShifts(dateStr);
+      const payDay = isPayDay(dateStr);
+      const isCommission = day===5;
+      const cls = data.vac ? 'vac-bg' : '';
+      html += `<td class="${cls}" data-date="${dateStr}" onclick="openModal('${dateStr}')">`;
+      html += `<div class="date">${day}</div><div class="stack">`;
+      // For MST Moreno row: hide if its PHT source date (D) is before PROJECT_START
+      const hideMoreno = tz==='mst' && dateStr < PROJECT_START;
+      const filteredPills = data.pills.filter(p=>{
+        if (!hideMoreno) return true;
+        // Skip Moreno-row pills (moreno label, vacation, company cover, off, or Carlo 1am-9am)
+        const label = p[0];
+        return !/Moreno|1am–9am|Company cover/.test(label);
+      });
+      filteredPills.forEach(([label,color])=>{
+        html += `<span class="pill ${color}">${label}</span>`;
+      });
+      if (payDay) html += `<span class="pill pay">$$$ Pay Day $$$</span>`;
+      if (isCommission) {
+        const prevMonthName = monthName(m===1?12:m-1);
+        html += `<span class="pill comm">${prevMonthName} Commission paid</span>`;
+      }
+      html += `</div></td>`;
+    }
+    dow++; day++;
+    if (dow===7 && day<=total) { html += '</tr><tr>'; dow=0; }
+  }
+  while (dow>0 && dow<7) { html += '<td class="empty"></td>'; dow++; }
+  html += '</tr></tbody></table>';
+  return html;
+}
+
+function render() {
+  document.getElementById('monthLabel').textContent = `${monthName(state.month)} ${state.year}`;
+
+  // Pay banner: show pay periods overlapping this month
+  const y = state.year, m = state.month;
+  const monthStart = fmtDate(y,m,1);
+  const monthEnd = fmtDate(y,m,daysInMonth(y,m));
+  const periods = new Set();
+  for (let d=1; d<=daysInMonth(y,m); d++) {
+    const info = payPeriodFor(fmtDate(y,m,d));
+    periods.add(`${info.periodStart}|${info.periodEnd}|${info.payDate}`);
+  }
+  document.getElementById('payBanner').innerHTML = [...periods].map(p=>{
+    const [s,e,pd] = p.split('|');
+    return `Pay Period: ${fmtHuman(s)} – ${fmtHuman(e)} &nbsp;|&nbsp; Pay Date: ${fmtHuman(pd)}`;
+  }).join('<br>');
+
+  const view = document.getElementById('viewMode').value;
+  const container = document.getElementById('calendars');
+  container.className = 'calendars' + (view==='both' ? '' : ' single');
+  let html = '';
+  if (view==='both' || view==='pht') {
+    html += `<div class="cal"><h2>PHT Calendar <small>— Philippine Time (UTC+8)</small></h2>${buildCalendar('pht')}</div>`;
+  }
+  if (view==='both' || view==='mst') {
+    html += `<div class="cal"><h2>MST Calendar <small>— Mountain Time (UTC-7)</small></h2>${buildCalendar('mst')}</div>`;
+  }
+  container.innerHTML = html;
+}
+
+function fmtHuman(dateStr) {
+  const [y,m,d] = dateStr.split('-').map(Number);
+  return `${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]} ${d}, ${y}`;
+}
+
+// Modal
+let editingDate = null;
+function openModal(dateStr) {
+  editingDate = dateStr;
+  const s = stateForDate(dateStr);
+  document.getElementById('modalTitle').textContent = `Edit — ${fmtHuman(dateStr)} (PHT)`;
+  document.getElementById('mStatus').value = s.m;
+  document.getElementById('aStatus').value = s.a;
+  document.getElementById('cStatus').value = s.c;
+  document.getElementById('modalBg').classList.add('show');
+}
+function closeModal(){ document.getElementById('modalBg').classList.remove('show'); }
+function saveDay() {
+  const [y,m,d] = editingDate.split('-').map(Number);
+  const def = defaultForDate(y,m,d);
+  const m_ = document.getElementById('mStatus').value;
+  const a_ = document.getElementById('aStatus').value;
+  const c_ = document.getElementById('cStatus').value;
+  const ov = {};
+  if (m_ !== def.m) ov.m = m_;
+  if (a_ !== def.a) ov.a = a_;
+  if (c_ !== def.c) ov.c = c_;
+  if (Object.keys(ov).length===0) delete state.overrides[editingDate];
+  else state.overrides[editingDate] = ov;
+  saveState(); render(); closeModal();
+}
+function clearDay() {
+  delete state.overrides[editingDate];
+  saveState(); render(); closeModal();
+}
+
+function resetMonth() {
+  if (!confirm(`Clear all overrides for ${monthName(state.month)} ${state.year}?`)) return;
+  Object.keys(state.overrides).forEach(k=>{
+    if (k.startsWith(`${state.year}-${String(state.month).padStart(2,'0')}`)) delete state.overrides[k];
+  });
+  saveState(); render();
+}
+function exportData() {
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'chatters_schedule.json';
+  a.click();
+}
+function importData(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    try { state = JSON.parse(e.target.result); saveState(); render(); }
+    catch(err){ alert('Invalid file'); }
+  };
+  r.readAsText(file);
+}
+
+document.getElementById('prevMonth').onclick = ()=>{
+  state.month--; if (state.month<1){ state.month=12; state.year--; } saveState(); render();
+};
+document.getElementById('nextMonth').onclick = ()=>{
+  state.month++; if (state.month>12){ state.month=1; state.year++; } saveState(); render();
+};
+document.getElementById('viewMode').onchange = render;
+document.getElementById('modalBg').onclick = (e)=>{ if (e.target.id==='modalBg') closeModal(); };
+
+// Seed known April 2026 overrides on first load
+if (Object.keys(state.overrides).length===0) {
+  state.overrides = {
+    '2026-04-12': { m:'off-company' },   // Sun, keep Aji off (default Sun? no, default Sun only Moreno. Aji off is a special case here)
+  };
+  // Seed the full April 2026 schedule (per master PHT copy):
+  // defaults: Sun=Moreno off, Tue=Aji off, Thu=Ace off
+  state.overrides = {
+    '2026-04-12': { m:'off-company', a:'off' },    // Sun: Moreno off company cover, Aji off (Carlo)
+    '2026-04-14': { a:'work', c:'off' },           // Tue: Aji works, Ace off (Carlo)
+    '2026-04-16': { c:'work' },                    // Thu: Ace works (not off)
+    '2026-04-18': { a:'off' },                     // Sat: Aji off (Carlo)
+    '2026-04-19': { m:'vac' },                     // Sun: Moreno vacation
+    '2026-04-20': { m:'vac' },
+    '2026-04-21': { m:'vac', a:'work' },           // Tue: Moreno vac, Aji works
+    '2026-04-22': { m:'vac' },
+    '2026-04-23': { c:'work' },                    // Thu: Ace works (not off) — pay day
+    '2026-04-25': { c:'off' },                     // Sat: Ace off (Carlo)
+    '2026-04-26': { m:'work', a:'off' },           // Sun: Moreno works, Aji off (Carlo)
+    '2026-04-28': { m:'off', a:'work' },           // Tue: Moreno off (Carlo), Aji works
+  };
+  // Remove empty override entries
+  Object.keys(state.overrides).forEach(k=>{
+    if (Object.keys(state.overrides[k]).length===0) delete state.overrides[k];
+  });
+  // Set initial month to April 2026
+  state.year = 2026; state.month = 4;
+  saveState();
+}
+
+render();
+restoreAutoSaveHandle();
+</script>
+</body>
+</html>
