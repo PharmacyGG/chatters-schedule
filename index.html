@@ -521,6 +521,27 @@ if (Object.keys(state.overrides).length===0) {
 
 render();
 restoreAutoSaveHandle();
+
+// ---- Auto-load published data.json (for GitHub Pages / hosted views) ----
+// If a data.json sits next to this HTML file, use it as the source of truth.
+// This lets you publish updates by replacing data.json in the repo — all
+// visitors will see your latest schedule on their next page load.
+(async function loadPublishedData() {
+  try {
+    const res = await fetch('./data.json', { cache: 'no-store' });
+    if (!res.ok) return;
+    const published = await res.json();
+    if (!published || typeof published !== 'object') return;
+    state = published;
+    saveState();
+    render();
+    const banner = document.createElement('div');
+    banner.className = 'no-print';
+    banner.style.cssText = 'background:#E8F4FD;border:1px solid #2E5A87;color:#2E5A87;padding:6px 12px;border-radius:4px;font-size:12px;margin-bottom:8px;';
+    banner.textContent = '✓ Viewing the published schedule — edits you make here will be overwritten on next page load.';
+    document.body.insertBefore(banner, document.getElementById('payBanner'));
+  } catch(e) { /* no data.json — use local state */ }
+})();
 </script>
 </body>
 </html>
