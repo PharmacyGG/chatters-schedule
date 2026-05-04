@@ -82,6 +82,10 @@
       "aji": "off",
       "jan": "work",
       "carlo": "off"
+    },
+    "2026-05-09": {
+      "ace": "off",
+      "carlo": "cover:ace"
     }
   }
 }
