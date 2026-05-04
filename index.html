@@ -2,18 +2,26 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chatters Team Schedule</title>
 <style>
   :root {
-    --moreno:#DCE8F5; --moreno-txt:#1F4D7A;
-    --aji:#DFF0D8;    --aji-txt:#2D6A2D;
-    --ace:#FCE5CC;    --ace-txt:#8A4B0F;
-    --carlo:#F8D7DA;  --carlo-txt:#8A1F2B;
-    --vac:#E4DAF5;    --vac-txt:#4B2E83;
-    --company:#D9D9D9;--company-txt:#333;
-    --off:#F2E8D5;    --off-txt:#7A5A1F;
-    --pay:#2E8B57;    --pay-txt:#FFF;
-    --comm:#F5E6C4;   --comm-txt:#6B4B00;
+    --c-moreno:#DCE8F5; --t-moreno:#1F4D7A;
+    --c-aji:#DFF0D8;    --t-aji:#2D6A2D;
+    --c-ace:#FCE5CC;    --t-ace:#8A4B0F;
+    --c-jan:#EDE7F6;    --t-jan:#4A148C;
+    --c-teal:#D0F0F0;   --t-teal:#0E5454;
+    --c-pink:#FBE4EC;   --t-pink:#A1185A;
+    --c-yellow:#FFF4C2; --t-yellow:#7A5A00;
+    --c-coral:#FFD9C9;  --t-coral:#A6391A;
+    --c-slate:#DEE2E6;  --t-slate:#3A4754;
+    --c-mint:#D8F3DC;   --t-mint:#1B5E20;
+    --c-floater:#F8D7DA; --t-floater:#8A1F2B;
+    --c-vac:#E4DAF5;    --t-vac:#4B2E83;
+    --c-company:#D9D9D9;--t-company:#333;
+    --c-off:#F2E8D5;    --t-off:#7A5A1F;
+    --c-pay:#2E8B57;    --t-pay:#FFF;
+    --c-comm:#F5E6C4;   --t-comm:#6B4B00;
     --border:#D6D6D6;
     --hdr:#F7F9F4;
   }
@@ -25,27 +33,29 @@
   button:hover { background:#F0F0F0;}
   button.primary { background:#2E5A87; color:#FFF; border-color:#2E5A87;}
   button.primary:hover { background:#1F3F66;}
-  select { padding:5px 8px; border:1px solid #CCC; border-radius:4px; font-size:13px;}
+  button.danger { background:#B33; color:#FFF; border-color:#B33;}
+  button.danger:hover { background:#922;}
+  select, input[type=text], input[type=date], input[type=number], input[type=time] {
+    padding:5px 8px; border:1px solid #CCC; border-radius:4px; font-size:13px;
+  }
   .pay-banner { background:var(--hdr); padding:8px 12px; border:1px solid var(--border); border-radius:4px; font-size:12px; margin-bottom:10px;}
   .legend { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;}
   .pill { padding:3px 8px; border-radius:3px; font-size:11px; font-weight:600; display:inline-block;}
-  .pill.moreno{background:var(--moreno);color:var(--moreno-txt);}
-  .pill.aji{background:var(--aji);color:var(--aji-txt);}
-  .pill.ace{background:var(--ace);color:var(--ace-txt);}
-  .pill.carlo{background:var(--carlo);color:var(--carlo-txt);}
-  .pill.vac{background:var(--vac);color:var(--vac-txt);}
-  .pill.company{background:var(--company);color:var(--company-txt);}
-  .pill.off{background:var(--off);color:var(--off-txt);}
-  .pill.pay{background:var(--pay);color:var(--pay-txt);}
-  .pill.comm{background:var(--comm);color:var(--comm-txt);}
+  .pill.floater{background:var(--c-floater);color:var(--t-floater);}
+  .pill.vac{background:var(--c-vac);color:var(--t-vac);}
+  .pill.company{background:var(--c-company);color:var(--t-company);}
+  .pill.off{background:var(--c-off);color:var(--t-off);}
+  .pill.pay{background:var(--c-pay);color:var(--t-pay);}
+  .pill.comm{background:var(--c-comm);color:var(--t-comm);}
   .calendars { display:grid; grid-template-columns:1fr 1fr; gap:16px;}
   .calendars.single { grid-template-columns:1fr;}
+  @media (max-width: 1100px) { .calendars { grid-template-columns:1fr;} }
   .cal { background:#FFF; border:1px solid var(--border); border-radius:4px; overflow:hidden;}
   .cal h2 { margin:0; padding:10px 12px; font-size:14px; background:var(--hdr); border-bottom:1px solid var(--border);}
   .cal h2 small { font-weight:normal; color:#666;}
   table { width:100%; border-collapse:collapse; table-layout:fixed;}
   th { background:#555; color:#FFF; font-weight:600; padding:6px 4px; font-size:11px;}
-  td { border:1px solid var(--border); vertical-align:top; padding:4px; height:90px; font-size:10px; cursor:pointer; position:relative;}
+  td { border:1px solid var(--border); vertical-align:top; padding:4px; height:96px; font-size:10px; cursor:pointer; position:relative;}
   td.empty { background:#FAFAFA; cursor:default;}
   td:hover:not(.empty) { background:#F5FAFF;}
   td .date { font-weight:600; font-size:11px; color:#555; margin-bottom:3px;}
@@ -60,83 +70,59 @@
     .cal { page-break-after:always; border:none;}
     td { height:auto; min-height:70px;}
   }
-  /* modal */
   .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,0.35); display:none; align-items:center; justify-content:center; z-index:10;}
   .modal-bg.show { display:flex;}
-  .modal { background:#FFF; padding:18px; border-radius:6px; width:320px; box-shadow:0 8px 24px rgba(0,0,0,0.2);}
-  .modal h3 { margin:0 0 10px; font-size:15px;}
+  .modal { background:#FFF; padding:18px; border-radius:6px; width:420px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 8px 24px rgba(0,0,0,0.2);}
+  .modal h3 { margin:0 0 12px; font-size:15px;}
   .modal .row { display:flex; gap:8px; align-items:center; margin-bottom:8px;}
-  .modal .row label { flex:0 0 60px; font-size:12px; font-weight:600;}
-  .modal .row select { flex:1;}
-  .modal .actions { display:flex; justify-content:space-between; margin-top:14px;}
+  .modal .row label { flex:0 0 80px; font-size:12px; font-weight:600;}
+  .modal .row select, .modal .row input { flex:1;}
+  .modal .actions { display:flex; justify-content:space-between; margin-top:14px; gap:8px;}
+  .chatter-row { border:1px solid var(--border); border-radius:4px; padding:8px; margin-bottom:6px; background:#FAFAFA;}
+  .chatter-row .head { display:flex; align-items:center; gap:8px; margin-bottom:6px;}
+  .chatter-row .head .name { font-weight:600; flex:1;}
+  .chatter-row .grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:12px;}
+  .chatter-row .grid label { display:block; font-size:11px; color:#666; margin-bottom:2px;}
+  .publish-banner { background:#FFF8E1; border:1px solid #F5C518; color:#7A5A00; padding:6px 12px; border-radius:4px; font-size:12px; margin-bottom:8px; }
+  .publish-banner code { background:#FFF; padding:2px 4px; border-radius:3px; font-size:11px; }
+  .live-banner { background:#E8F4FD;border:1px solid #2E5A87;color:#2E5A87;padding:6px 12px;border-radius:4px;font-size:12px;margin-bottom:8px; }
+  .dot { display:inline-block; width:10px; height:10px; border-radius:50%; vertical-align:middle; margin-right:4px; }
 </style>
 </head>
 <body>
 <header class="no-print">
   <h1>Chatters Team Schedule</h1>
-  <button id="prevMonth">&larr;</button>
+  <button id="prevMonth" title="Previous month">&larr;</button>
   <span id="monthLabel" style="font-weight:600; min-width:140px; text-align:center;"></span>
-  <button id="nextMonth">&rarr;</button>
+  <button id="nextMonth" title="Next month">&rarr;</button>
   <select id="viewMode">
     <option value="both">PHT + MST</option>
     <option value="pht">PHT only</option>
     <option value="mst">MST only</option>
   </select>
-  <button class="primary" onclick="window.print()">Export PDF (Print)</button>
-  <button onclick="resetMonth()">Reset month</button>
-  <button id="autoSaveBtn" onclick="connectAutoSave()">🔒 Connect auto-save file</button>
-  <span id="autoSaveStatus" style="font-size:12px; color:#666;"></span>
-  <button onclick="exportData()">Download backup</button>
-  <button onclick="document.getElementById('importFile').click()">Import data</button>
+  <button onclick="openTeamModal()">Manage team</button>
+  <button class="primary" onclick="downloadDataJson()">Download data.json</button>
+  <button onclick="document.getElementById('importFile').click()">Import data.json</button>
   <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+  <button onclick="window.print()">Print</button>
+  <button onclick="resetMonth()">Reset month overrides</button>
 </header>
 
-<div class="pay-banner" id="payBanner"></div>
-
-<div class="legend no-print">
-  <span class="pill moreno">Moreno 4pm–12am PHT</span>
-  <span class="pill aji">Aji 12am–8am PHT</span>
-  <span class="pill ace">Ace 8am–4pm PHT</span>
-  <span class="pill carlo">Carlo (floater)</span>
-  <span class="pill vac">Vacation</span>
-  <span class="pill company">Company cover</span>
-  <span class="pill off">Day off</span>
-  <span class="pill pay">$$$ Pay Day</span>
-  <span class="pill comm">Commission paid</span>
-  <span style="font-size:11px; color:#666; margin-left:auto;">Click any day cell to edit</span>
+<div id="publishHint" class="publish-banner no-print" style="display:none;">
+  <strong>Unpublished changes.</strong> Click <em>Download data.json</em>, then drag-drop it into your GitHub repo to update the live site.
 </div>
 
-<div class="calendars" id="calendars"></div>
+<div class="pay-banner" id="payBanner"></div>
+<div class="legend no-print" id="legend"></div>
 
-<!-- edit modal -->
-<div class="modal-bg" id="modalBg">
+<div class="calendars" id="calendars"></div>
+<!-- Day-edit modal (rendered dynamically) -->
+<div class="modal-bg" id="dayModalBg">
   <div class="modal">
-    <h3 id="modalTitle">Edit day</h3>
-    <div class="row">
-      <label>Moreno</label>
-      <select id="mStatus">
-        <option value="work">Works 4pm–12am</option>
-        <option value="off">Off — Carlo covers</option>
-        <option value="off-company">Off — Company cover</option>
-        <option value="vac">Vacation — Carlo covers</option>
-      </select>
-    </div>
-    <div class="row">
-      <label>Aji</label>
-      <select id="aStatus">
-        <option value="work">Works 12am–8am</option>
-        <option value="off">Off — Carlo covers</option>
-      </select>
-    </div>
-    <div class="row">
-      <label>Ace</label>
-      <select id="cStatus">
-        <option value="work">Works 8am–4pm</option>
-        <option value="off">Off — Carlo covers</option>
-      </select>
-    </div>
+    <h3 id="dayModalTitle">Edit day</h3>
+    <div id="dayModalBody"></div>
     <div class="actions">
-      <button onclick="closeModal()">Cancel</button>
+      <button onclick="closeDayModal()">Cancel</button>
       <div>
         <button onclick="clearDay()">Reset to default</button>
         <button class="primary" onclick="saveDay()">Save</button>
@@ -145,239 +131,350 @@
   </div>
 </div>
 
-<script>
-const STORAGE_KEY = 'chatters_schedule_v2';
-const PAY_ANCHOR = '2026-04-23'; // known pay date; biweekly forward & back
-const PROJECT_START = '2026-04-10'; // first PHT working day; earlier cells render blank
+<!-- Team-management modal -->
+<div class="modal-bg" id="teamModalBg">
+  <div class="modal" style="width:560px;">
+    <h3>Manage team</h3>
+    <p style="font-size:12px; color:#666; margin:0 0 10px;">
+      Add or remove chatters, change shifts/off-days, and set start/end dates. Default rotations apply automatically — overrides handle exceptions.
+    </p>
+    <div id="teamList"></div>
+    <button onclick="addChatter()" style="margin-top:8px;">+ Add chatter</button>
+    <hr style="margin:14px 0; border:none; border-top:1px solid #EEE;">
+    <h3 style="font-size:14px;">Floater coverage</h3>
+    <p style="font-size:12px; color:#666; margin:0 0 8px;">
+      Configure who covers off-days (typically Carlo). Choose which chatter's off-day this floater covers each day of the week.
+    </p>
+    <div id="floaterList"></div>
+    <button onclick="addFloater()" style="margin-top:8px;">+ Add floater</button>
+    <div class="actions">
+      <button onclick="closeTeamModal()">Cancel</button>
+      <button class="primary" onclick="saveTeam()">Save team</button>
+    </div>
+  </div>
+</div>
 
-// Default rotation: off-days by weekday (0=Sun..6=Sat)
-const MORENO_OFF_DOW = 0; // Sunday
-const AJI_OFF_DOW    = 2; // Tuesday
-const ACE_OFF_DOW    = 4; // Thursday
+<script>
+// ============================================================
+// CHATTERS SCHEDULE DASHBOARD v2 — team-aware, data.json driven
+// ============================================================
+const STORAGE_KEY = 'chatters_schedule_v5';
+const COLOR_OPTIONS = ['moreno','aji','ace','jan','teal','pink','yellow','coral','slate','mint'];
+
+// ----- Default state if data.json doesn't exist yet -----
+function defaultState() {
+  return {
+    version: 2,
+    config: {
+      project_start: '2026-04-10',
+      pay_anchor: '2026-04-23',
+      pay_cadence_days: 14,
+      pay_offset_days: 4,        // pay date is N days after period end
+      commission_day_of_month: 5,
+      pht_to_mst_offset_hours: -15,
+    },
+    view: { year: 2026, month: 5 },
+    chatters: [
+      { id:'moreno', name:'Moreno', color:'moreno',
+        shift_pht:{start:'16:00', end:'00:00', label:'4pm–12am'},
+        off_dow_pht:0, start_date:'2026-04-10', end_date:null,
+        covered_by:'carlo' },
+      { id:'aji', name:'Aji', color:'aji',
+        shift_pht:{start:'00:00', end:'08:00', label:'12am–8am'},
+        off_dow_pht:2, start_date:'2026-04-10', end_date:null,
+        covered_by:'carlo' },
+      { id:'ace', name:'Ace', color:'ace',
+        shift_pht:{start:'08:00', end:'16:00', label:'8am–4pm'},
+        off_dow_pht:4, start_date:'2026-04-10', end_date:null,
+        covered_by:'carlo' },
+      { id:'jan', name:'Jan', color:'jan',
+        shift_pht:{start:'00:00', end:'08:00', label:'12am–8am'},
+        off_dow_pht:3, start_date:'2026-05-05', end_date:null,
+        covered_by:'carlo' },
+    ],
+    floaters: [
+      { id:'carlo', name:'Carlo', color:'floater' }
+    ],
+    overrides: {}   // 'YYYY-MM-DD' -> { chatter_id: 'work'|'off'|'vac'|'off-company' }
+  };
+}
 
 let state = loadState();
 
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.version === 2 && parsed.chatters) return parsed;
+    }
   } catch(e) {}
-  const today = new Date();
-  return {
-    year: today.getFullYear(),
-    month: today.getMonth()+1,
-    overrides: {} // key 'YYYY-MM-DD' -> { m:'work|off|off-company|vac', a:'work|off', c:'work|off' }
-  };
+  return defaultState();
 }
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  autoSaveToFile();
+  document.getElementById('publishHint').style.display = '';
 }
 
-// ---- Auto-save to file (File System Access API) ----
-let fileHandle = null;
-const IDB_NAME = 'chatters_dashboard';
-const IDB_STORE = 'handles';
-
-function idb(mode) {
-  return new Promise((res, rej)=>{
-    const req = indexedDB.open(IDB_NAME, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
-    req.onsuccess = () => {
-      const tx = req.result.transaction(IDB_STORE, mode);
-      res(tx.objectStore(IDB_STORE));
-    };
-    req.onerror = () => rej(req.error);
-  });
-}
-async function idbGet(key){ const s = await idb('readonly'); return new Promise((r)=>{ const rq = s.get(key); rq.onsuccess=()=>r(rq.result); }); }
-async function idbSet(key,val){ const s = await idb('readwrite'); return new Promise((r)=>{ const rq = s.put(val,key); rq.onsuccess=()=>r(); }); }
-async function idbDel(key){ const s = await idb('readwrite'); return new Promise((r)=>{ const rq = s.delete(key); rq.onsuccess=()=>r(); }); }
-
-function setAutoSaveStatus(msg, color) {
-  const el = document.getElementById('autoSaveStatus');
-  if (el) { el.textContent = msg; el.style.color = color || '#666'; }
-}
-
-async function connectAutoSave() {
-  if (!window.showSaveFilePicker) {
-    alert('Auto-save requires Chrome, Edge, or another Chromium-based browser. Use "Download backup" instead.');
-    return;
-  }
-  try {
-    const handle = await window.showSaveFilePicker({
-      suggestedName: 'chatters_schedule.json',
-      types: [{ description:'JSON', accept:{'application/json':['.json']}}]
-    });
-    fileHandle = handle;
-    await idbSet('fileHandle', handle);
-    await writeToFile();
-    setAutoSaveStatus('✓ Auto-saving to ' + handle.name, '#2E8B57');
-    document.getElementById('autoSaveBtn').textContent = '🔓 Change auto-save file';
-  } catch(e) { if (e.name!=='AbortError') alert('Could not connect: '+e.message); }
-}
-
-async function verifyPermission(handle) {
-  const opts = { mode:'readwrite' };
-  if ((await handle.queryPermission(opts)) === 'granted') return true;
-  if ((await handle.requestPermission(opts)) === 'granted') return true;
-  return false;
-}
-
-async function writeToFile() {
-  if (!fileHandle) return;
-  try {
-    if (!(await verifyPermission(fileHandle))) {
-      setAutoSaveStatus('⚠ Permission denied — click "Change auto-save file" to reconnect', '#B33');
-      return;
-    }
-    const writable = await fileHandle.createWritable();
-    await writable.write(JSON.stringify(state, null, 2));
-    await writable.close();
-    setAutoSaveStatus('✓ Saved ' + new Date().toLocaleTimeString() + ' to ' + fileHandle.name, '#2E8B57');
-  } catch(e) { setAutoSaveStatus('⚠ Save failed: ' + e.message, '#B33'); }
-}
-
-let saveTimer = null;
-function autoSaveToFile() {
-  if (!fileHandle) return;
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(writeToFile, 300); // debounce rapid edits
-}
-
-async function restoreAutoSaveHandle() {
-  if (!window.showSaveFilePicker) {
-    setAutoSaveStatus('Auto-save unavailable in this browser');
-    document.getElementById('autoSaveBtn').style.display = 'none';
-    return;
-  }
-  try {
-    const handle = await idbGet('fileHandle');
-    if (handle) {
-      fileHandle = handle;
-      const ok = (await handle.queryPermission({mode:'readwrite'})) === 'granted';
-      if (ok) {
-        setAutoSaveStatus('✓ Auto-saving to ' + handle.name, '#2E8B57');
-      } else {
-        setAutoSaveStatus('⚠ Click "Change auto-save file" to re-grant permission', '#B33');
-      }
-      document.getElementById('autoSaveBtn').textContent = '🔓 Change auto-save file';
-    } else {
-      setAutoSaveStatus('Not connected — edits save locally only');
-    }
-  } catch(e) { setAutoSaveStatus('Not connected — edits save locally only'); }
-}
-
+// ============================================================
+// Date helpers
+// ============================================================
 function fmtDate(y,m,d){ return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
 function addDays(dateStr, n){ const d = new Date(dateStr+'T00:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
 function daysInMonth(y,m){ return new Date(y,m,0).getDate(); }
 function monthName(m){ return ['January','February','March','April','May','June','July','August','September','October','November','December'][m-1]; }
+function fmtHuman(dateStr) {
+  const [y,m,d] = dateStr.split('-').map(Number);
+  return `${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]} ${d}, ${y}`;
+}
+function dowOf(dateStr) {
+  return new Date(dateStr+'T00:00:00').getDay(); // 0=Sun..6=Sat
+}
+function dowName(dow) {
+  return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dow];
+}
 
-function defaultForDate(y,m,d) {
-  const dow = new Date(y,m-1,d).getDay();
+// ============================================================
+// Shift helpers — derive MST shift + date offset from PHT shift
+// ============================================================
+function parseHHMM(s) { const [h,m] = s.split(':').map(Number); return h*60 + (m||0); }
+function fmt12h(min) {
+  let h = Math.floor(min/60) % 24, m = min % 60;
+  const ampm = h<12 ? 'am' : 'pm';
+  let h12 = h % 12; if (h12===0) h12 = 12;
+  return `${h12}${m?':'+String(m).padStart(2,'0'):''}${ampm}`;
+}
+function shiftRangeLabel(startMin, endMin) {
+  return `${fmt12h(startMin)}–${fmt12h(endMin)}`;
+}
+// Convert PHT shift to MST: shift hours backward by 15h → may roll into previous MST date
+function mstShiftFor(chatter) {
+  const startPHT = parseHHMM(chatter.shift_pht.start);
+  const endPHT = parseHHMM(chatter.shift_pht.end);
+  const dur = (endPHT - startPHT + 24*60) % (24*60) || 8*60;
+  const offsetMin = (state.config.pht_to_mst_offset_hours || -15) * 60;
+  // MST shift starts at PHT_start + offset
+  let startMST = startPHT + offsetMin;
+  // dateShift: -1 if start crosses midnight backward
+  let dateShift = 0;
+  while (startMST < 0) { startMST += 24*60; dateShift -= 1; }
+  while (startMST >= 24*60) { startMST -= 24*60; dateShift += 1; }
+  const endMST = (startMST + dur) % (24*60);
   return {
-    m: dow===MORENO_OFF_DOW ? 'off' : 'work',
-    a: dow===AJI_OFF_DOW    ? 'off' : 'work',
-    c: dow===ACE_OFF_DOW    ? 'off' : 'work',
+    label: shiftRangeLabel(startMST, endMST),
+    dateShift,                        // 0 means MST date D pulls from PHT date D; -1 means D pulls from D+1
   };
 }
-
-function stateForDate(dateStr) {
-  const [y,m,d] = dateStr.split('-').map(Number);
-  const def = defaultForDate(y,m,d);
-  const ov = state.overrides[dateStr] || {};
-  return { m: ov.m ?? def.m, a: ov.a ?? def.a, c: ov.c ?? def.c };
+// Convenience: cache per chatter
+function chatterMstInfo(c) {
+  if (!c._mst) c._mst = mstShiftFor(c);
+  return c._mst;
+}
+function clearMstCache() {
+  state.chatters.forEach(c => delete c._mst);
 }
 
-// PHT cell shifts for a given PHT date
-function phtShifts(dateStr) {
-  const s = stateForDate(dateStr);
+// ============================================================
+// Defaults & overrides for a chatter on a given PHT date
+// ============================================================
+function chatterIsActive(c, dateStr) {
+  if (c.start_date && dateStr < c.start_date) return false;
+  if (c.end_date && dateStr > c.end_date) return false;
+  return true;
+}
+function defaultStatusFor(chatter, dateStr) {
+  const dow = dowOf(dateStr);
+  if (dow === chatter.off_dow_pht) return 'off';
+  return 'work';
+}
+function statusFor(chatter, dateStr) {
+  const ov = (state.overrides[dateStr] || {})[chatter.id];
+  return ov ?? defaultStatusFor(chatter, dateStr);
+}
+
+// Floater overrides per day:
+//   undefined / 'auto'    → cover any chatter who is off/vac AND has covered_by===this floater
+//   'off'                 → no coverage today, even if a chatter is off
+//   'cover:<chatter_id>'  → cover that chatter's shift today regardless of their status
+function floaterOverrideFor(floater, dateStr) {
+  return (state.overrides[dateStr] || {})[floater.id] || 'auto';
+}
+
+// Returns the PHT-date coverage events for a single floater.
+function coverageForFloater(floater, dateStr) {
+  const ovr = floaterOverrideFor(floater, dateStr);
   const out = [];
-  // Moreno
-  if (s.m==='work') out.push(['Moreno 4pm–12am','moreno']);
-  else if (s.m==='vac') out.push(['Moreno — vacation','vac'],['Carlo covers 4pm–12am','carlo']);
-  else if (s.m==='off-company') out.push(['Company cover 4pm–12am','company'],['Moreno — off','off']);
-  else out.push(['Carlo — 4pm–12am','carlo'],['Moreno — off','off']);
-  // Aji
-  if (s.a==='work') out.push(['Aji 12am–8am','aji']);
-  else out.push(['Carlo — 12am–8am','carlo'],['Aji — off','off']);
-  // Ace
-  if (s.c==='work') out.push(['Ace 8am–4pm','ace']);
-  else out.push(['Carlo — 8am–4pm','carlo'],['Ace — off','off']);
-  return { pills: out, vac: s.m==='vac' };
+  if (ovr === 'off') return out;
+  if (typeof ovr === 'string' && ovr.startsWith('cover:')) {
+    const targetId = ovr.slice('cover:'.length);
+    const c = state.chatters.find(x => x.id === targetId);
+    if (c) out.push({
+      floater_id: floater.id, floater_name: floater.name, floater_color: floater.color,      covers_id: c.id, covers_name: c.name,
+      shift_pht_label: c.shift_pht.label,
+      shift_mst_label: chatterMstInfo(c).label,
+      is_manual: true,
+    });
+    return out;
+  }
+  // auto: walk chatters this floater is assigned to cover
+  for (const c of state.chatters) {
+    if (!chatterIsActive(c, dateStr)) continue;
+    if (c.covered_by !== floater.id) continue;
+    const st = statusFor(c, dateStr);
+    if (st === 'hidden') continue;
+    if (st !== 'off' && st !== 'vac') continue;
+    out.push({
+      floater_id: floater.id, floater_name: floater.name, floater_color: floater.color,
+      covers_id: c.id, covers_name: c.name,
+      shift_pht_label: c.shift_pht.label,
+      shift_mst_label: chatterMstInfo(c).label,
+      is_vacation: st === 'vac',
+    });
+  }
+  return out;
 }
 
-// MST cell shifts for MST date D:
-//   Moreno from PHT date D
-//   Aji/Ace from PHT date D+1
-function mstShifts(dateStr) {
-  const morenoPHT = stateForDate(dateStr);
-  const nextPHT   = stateForDate(addDays(dateStr,1));
+// Aggregate floater coverage on a PHT date (used by phtCellPills)
+function floaterCoverageFor(dateStr) {
   const out = [];
-  if (morenoPHT.m==='work') out.push(['Moreno 1am–9am','moreno']);
-  else if (morenoPHT.m==='vac') out.push(['Moreno — vacation','vac'],['Carlo covers 1am–9am','carlo']);
-  else if (morenoPHT.m==='off-company') out.push(['Company cover 1am–9am','company'],['Moreno — off','off']);
-  else out.push(['Carlo — 1am–9am','carlo'],['Moreno — off','off']);
-  if (nextPHT.a==='work') out.push(['Aji 9am–5pm','aji']);
-  else out.push(['Carlo — 9am–5pm','carlo'],['Aji — off','off']);
-  if (nextPHT.c==='work') out.push(['Ace 5pm–1am','ace']);
-  else out.push(['Carlo — 5pm–1am','carlo'],['Ace — off','off']);
-  return { pills: out, vac: morenoPHT.m==='vac' };
+  for (const f of state.floaters) out.push(...coverageForFloater(f, dateStr));
+  return out;
+}
+// ============================================================
+// Build pills for a calendar cell
+// ============================================================
+function pillStyle(colorKey) {
+  return `background:var(--c-${colorKey});color:var(--t-${colorKey});`;
+}
+function pillHTML(label, colorKey) {
+  return `<span class="pill" style="${pillStyle(colorKey)}">${escapeHtml(label)}</span>`;
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
 
+function phtCellPills(dateStr) {
+  // Show every active chatter (working or off), plus floater coverage where applicable.
+  const pills = [];
+  let hasVac = false;
+  for (const c of state.chatters) {
+    if (!chatterIsActive(c, dateStr)) continue;
+    const st = statusFor(c, dateStr);
+    if (st === 'hidden') continue;
+    if (st === 'work') {
+      pills.push(pillHTML(`${c.name} ${c.shift_pht.label}`, c.color));
+    } else if (st === 'vac') {
+      pills.push(pillHTML(`${c.name} — vacation`, 'vac'));
+      hasVac = true;
+    } else if (st === 'off-company') {
+      pills.push(pillHTML(`Company cover ${c.shift_pht.label}`, 'company'));
+      pills.push(pillHTML(`${c.name} — off`, 'off'));
+    } else { // 'off'
+      pills.push(pillHTML(`${c.name} — off`, 'off'));
+    }
+  }
+  // Floater coverage
+  const cov = floaterCoverageFor(dateStr);
+  for (const k of cov) {
+    pills.push(pillHTML(`${k.floater_name} — ${k.shift_pht_label}`, k.floater_color));
+  }
+  return { pills, hasVac };
+}
+
+function mstCellPills(dateStr) {
+  // For MST date D, each chatter's row is pulled from PHT date (D - chatter.dateShift_to_pht).
+  // Equivalently: chatter c with dateShift=-1 in MST means MST D shows what PHT D+1's status was.
+  const pills = [];
+  let hasVac = false;
+  for (const c of state.chatters) {
+    const info = chatterMstInfo(c);
+    const phtDate = addDays(dateStr, -info.dateShift); // dateShift=-1 → phtDate = D+1
+    if (!chatterIsActive(c, phtDate)) continue;
+    const st = statusFor(c, phtDate);
+    if (st === 'hidden') continue;
+    if (st === 'work') {
+      pills.push(pillHTML(`${c.name} ${info.label}`, c.color));
+    } else if (st === 'vac') {
+      pills.push(pillHTML(`${c.name} — vacation`, 'vac'));
+      hasVac = true;
+    } else if (st === 'off-company') {
+      pills.push(pillHTML(`Company cover ${info.label}`, 'company'));
+      pills.push(pillHTML(`${c.name} — off`, 'off'));
+    } else {
+      pills.push(pillHTML(`${c.name} — off`, 'off'));
+    }
+  }
+  // Floater coverage in MST: each coverage event is rendered on the MST date that pairs with
+  // the covered chatter's PHT date (apply that chatter's dateShift).
+  for (const f of state.floaters) {
+    // Possible PHT dates that map to this MST date for any chatter: D-(-shift) = D+|shift|
+    // Probe both PHT D and PHT D+1 (covers the dateShift -1 case).
+    for (const phtOffset of [0, 1]) {
+      const phtDate = addDays(dateStr, phtOffset);
+      const events = coverageForFloater(f, phtDate);
+      for (const ev of events) {
+        const target = state.chatters.find(c => c.id === ev.covers_id);
+        if (!target) continue;
+        const info = chatterMstInfo(target);
+        // Only show this event on MST D iff phtDate maps to dateStr via target's dateShift
+        if (addDays(phtDate, info.dateShift) !== dateStr) continue;
+        pills.push(pillHTML(`${f.name} — ${info.label}`, f.color));
+      }
+    }
+  }
+  return { pills, hasVac };
+}
+
+// ============================================================
+// Pay days
+// ============================================================
 function isPayDay(dateStr) {
-  const diffDays = Math.round((new Date(dateStr) - new Date(PAY_ANCHOR)) / 86400000);
-  return diffDays % 14 === 0;
+  const cadence = state.config.pay_cadence_days || 14;
+  const diffDays = Math.round((new Date(dateStr+'T00:00:00') - new Date(state.config.pay_anchor+'T00:00:00')) / 86400000);
+  return ((diffDays % cadence) + cadence) % cadence === 0;
 }
 function payPeriodFor(dateStr) {
-  const diffDays = Math.round((new Date(dateStr) - new Date(PAY_ANCHOR)) / 86400000);
-  const periodsFromAnchor = Math.floor(diffDays/14);
-  const payDate = addDays(PAY_ANCHOR, periodsFromAnchor*14 + (diffDays%14===0 ? 0 : 14));
-  const periodEnd = addDays(payDate, -4);    // pay day is 4 days after period end (matches historical cadence)
-  const periodStart = addDays(periodEnd, -13);
+  const cadence = state.config.pay_cadence_days || 14;
+  const offset = state.config.pay_offset_days ?? 4;
+  const anchor = state.config.pay_anchor;
+  const diffDays = Math.round((new Date(dateStr+'T00:00:00') - new Date(anchor+'T00:00:00')) / 86400000);
+  const periodsFromAnchor = Math.floor(diffDays/cadence);
+  const isExactly = ((diffDays % cadence) + cadence) % cadence === 0;
+  const payDate = addDays(anchor, periodsFromAnchor*cadence + (isExactly ? 0 : cadence));
+  const periodEnd = addDays(payDate, -offset);
+  const periodStart = addDays(periodEnd, -(cadence-1));
   return { payDate, periodStart, periodEnd };
 }
 
+// ============================================================
+// Calendar build + render
+// ============================================================
 function buildCalendar(tz) {
-  const y = state.year, m = state.month;
+  const y = state.view.year, m = state.view.month;
   const first = new Date(y, m-1, 1);
-  const startDow = first.getDay(); // Sunday=0
+  const startDow = first.getDay();
   const total = daysInMonth(y,m);
   let html = `<table><thead><tr>` +
     ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map(d=>`<th>${d}</th>`).join('') +
-    `</tr></thead><tbody>`;
-  let day = 1, row = 0, dow = startDow;
-  html += '<tr>';
+    `</tr></thead><tbody><tr>`;
   for (let i=0;i<startDow;i++) html += '<td class="empty"></td>';
-  // Earliest visible cell is PROJECT_START for both calendars (shifts before this weren't worked).
-  const earliestVisible = PROJECT_START;
+  let day = 1, dow = startDow;
   while (day <= total) {
     const dateStr = fmtDate(y,m,day);
-    const beforeStart = dateStr < earliestVisible;
-    if (beforeStart) {
+    const before = state.config.project_start && dateStr < state.config.project_start;
+    if (before) {
       html += `<td class="empty"><div class="date">${day}</div></td>`;
     } else {
-      const data = tz==='pht' ? phtShifts(dateStr) : mstShifts(dateStr);
-      const payDay = isPayDay(dateStr);
-      const isCommission = day===5;
-      const cls = data.vac ? 'vac-bg' : '';
-      html += `<td class="${cls}" data-date="${dateStr}" onclick="openModal('${dateStr}')">`;
+      const data = tz==='pht' ? phtCellPills(dateStr) : mstCellPills(dateStr);
+      const cls = data.hasVac ? 'vac-bg' : '';
+      html += `<td class="${cls}" data-date="${dateStr}" onclick="openDayModal('${dateStr}')">`;
       html += `<div class="date">${day}</div><div class="stack">`;
-      // For MST Moreno row: hide if its PHT source date (D) is before PROJECT_START
-      const hideMoreno = tz==='mst' && dateStr < PROJECT_START;
-      const filteredPills = data.pills.filter(p=>{
-        if (!hideMoreno) return true;
-        // Skip Moreno-row pills (moreno label, vacation, company cover, off, or Carlo 1am-9am)
-        const label = p[0];
-        return !/Moreno|1am–9am|Company cover/.test(label);
-      });
-      filteredPills.forEach(([label,color])=>{
-        html += `<span class="pill ${color}">${label}</span>`;
-      });
-      if (payDay) html += `<span class="pill pay">$$$ Pay Day $$$</span>`;
-      if (isCommission) {
-        const prevMonthName = monthName(m===1?12:m-1);
-        html += `<span class="pill comm">${prevMonthName} Commission paid</span>`;
+      html += data.pills.join('');
+      if (isPayDay(dateStr)) html += `<span class="pill pay">$$$ Pay Day</span>`;
+      const commDay = state.config.commission_day_of_month || 5;
+      if (day === commDay) {
+        const prev = monthName(m===1?12:m-1);
+        html += `<span class="pill comm">${prev} Commission paid</span>`;
       }
       html += `</div></td>`;
     }
@@ -389,13 +486,28 @@ function buildCalendar(tz) {
   return html;
 }
 
-function render() {
-  document.getElementById('monthLabel').textContent = `${monthName(state.month)} ${state.year}`;
+function renderLegend() {
+  const items = [];
+  for (const c of state.chatters) {
+    const phtLabel = `${c.name} ${c.shift_pht.label} PHT`;
+    items.push(`<span class="pill" style="${pillStyle(c.color)}">${escapeHtml(phtLabel)}</span>`);
+  }
+  for (const f of state.floaters) {
+    items.push(`<span class="pill" style="${pillStyle(f.color)}">${escapeHtml(f.name)} (floater)</span>`);
+  }
+  items.push(`<span class="pill vac">Vacation</span>`);
+  items.push(`<span class="pill company">Company cover</span>`);
+  items.push(`<span class="pill off">Day off</span>`);
+  items.push(`<span class="pill pay">$$$ Pay Day</span>`);
+  items.push(`<span class="pill comm">Commission paid</span>`);
+  items.push(`<span style="font-size:11px; color:#666; margin-left:auto;">Click any day cell to edit</span>`);
+  document.getElementById('legend').innerHTML = items.join(' ');
+}
 
-  // Pay banner: show pay periods overlapping this month
-  const y = state.year, m = state.month;
-  const monthStart = fmtDate(y,m,1);
-  const monthEnd = fmtDate(y,m,daysInMonth(y,m));
+function render() {
+  clearMstCache();
+  document.getElementById('monthLabel').textContent = `${monthName(state.view.month)} ${state.view.year}`;
+  const y = state.view.year, m = state.view.month;
   const periods = new Set();
   for (let d=1; d<=daysInMonth(y,m); d++) {
     const info = payPeriodFor(fmtDate(y,m,d));
@@ -405,6 +517,8 @@ function render() {
     const [s,e,pd] = p.split('|');
     return `Pay Period: ${fmtHuman(s)} – ${fmtHuman(e)} &nbsp;|&nbsp; Pay Date: ${fmtHuman(pd)}`;
   }).join('<br>');
+
+  renderLegend();
 
   const view = document.getElementById('viewMode').value;
   const container = document.getElementById('calendars');
@@ -418,55 +532,235 @@ function render() {
   }
   container.innerHTML = html;
 }
-
-function fmtHuman(dateStr) {
-  const [y,m,d] = dateStr.split('-').map(Number);
-  return `${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]} ${d}, ${y}`;
-}
-
-// Modal
+// ============================================================
+// Day-edit modal — dynamic per chatter + floater
+// ============================================================
 let editingDate = null;
-function openModal(dateStr) {
+function openDayModal(dateStr) {
   editingDate = dateStr;
-  const s = stateForDate(dateStr);
-  document.getElementById('modalTitle').textContent = `Edit — ${fmtHuman(dateStr)} (PHT)`;
-  document.getElementById('mStatus').value = s.m;
-  document.getElementById('aStatus').value = s.a;
-  document.getElementById('cStatus').value = s.c;
-  document.getElementById('modalBg').classList.add('show');
+  const dow = dowOf(dateStr);
+  const rows = [];
+  rows.push(`<p style="font-size:12px; color:#666; margin:0 0 8px;">${escapeHtml(fmtHuman(dateStr))} (${dowName(dow)}) — PHT</p>`);
+  for (const c of state.chatters) {
+    if (!chatterIsActive(c, dateStr)) continue;
+    const cur = statusFor(c, dateStr);
+    const def = defaultStatusFor(c, dateStr);
+    rows.push(`
+      <div class="row">
+        <label><span class="dot" style="background:var(--c-${c.color})"></span>${escapeHtml(c.name)}</label>
+        <select id="day_${c.id}">
+          <option value="work" ${cur==='work'?'selected':''}>Works ${escapeHtml(c.shift_pht.label)}</option>
+          <option value="off" ${cur==='off'?'selected':''}>Off</option>
+          <option value="vac" ${cur==='vac'?'selected':''}>Vacation</option>
+          <option value="off-company" ${cur==='off-company'?'selected':''}>Off — company cover</option>
+          <option value="hidden" ${cur==='hidden'?'selected':''}>Not scheduled (hide)</option>
+        </select>
+        <span style="font-size:10px;color:#999;margin-left:6px;">default: ${def}</span>
+      </div>
+    `);
+  }
+  // Floaters
+  if (state.floaters.length) {
+    rows.push(`<hr style="margin:10px 0; border:none; border-top:1px solid #EEE;">`);
+    rows.push(`<p style="font-size:11px; color:#666; margin:0 0 6px;">Floater coverage today (Auto = cover whoever is off; or pick a specific chatter to cover)</p>`);
+    for (const f of state.floaters) {
+      const cur = floaterOverrideFor(f, dateStr);
+      // Build options
+      const opts = [
+        `<option value="auto" ${cur==='auto'?'selected':''}>Auto (default)</option>`,
+        `<option value="off" ${cur==='off'?'selected':''}>Off — no coverage</option>`,
+      ];
+      for (const c of state.chatters) {
+        if (!chatterIsActive(c, dateStr)) continue;
+        const v = `cover:${c.id}`;
+        opts.push(`<option value="${v}" ${cur===v?'selected':''}>Cover ${escapeHtml(c.name)} (${escapeHtml(c.shift_pht.label)})</option>`);
+      }
+      rows.push(`
+        <div class="row">
+          <label><span class="dot" style="background:var(--c-${f.color})"></span>${escapeHtml(f.name)}</label>
+          <select id="day_${f.id}">${opts.join('')}</select>
+        </div>
+      `);
+    }
+  }
+  document.getElementById('dayModalTitle').textContent = `Edit day`;
+  document.getElementById('dayModalBody').innerHTML = rows.join('');
+  document.getElementById('dayModalBg').classList.add('show');
 }
-function closeModal(){ document.getElementById('modalBg').classList.remove('show'); }
+function closeDayModal(){ document.getElementById('dayModalBg').classList.remove('show'); }
 function saveDay() {
-  const [y,m,d] = editingDate.split('-').map(Number);
-  const def = defaultForDate(y,m,d);
-  const m_ = document.getElementById('mStatus').value;
-  const a_ = document.getElementById('aStatus').value;
-  const c_ = document.getElementById('cStatus').value;
   const ov = {};
-  if (m_ !== def.m) ov.m = m_;
-  if (a_ !== def.a) ov.a = a_;
-  if (c_ !== def.c) ov.c = c_;
-  if (Object.keys(ov).length===0) delete state.overrides[editingDate];
+  for (const c of state.chatters) {
+    if (!chatterIsActive(c, editingDate)) continue;
+    const sel = document.getElementById('day_'+c.id);
+    if (!sel) continue;
+    const def = defaultStatusFor(c, editingDate);
+    if (sel.value !== def) ov[c.id] = sel.value;
+  }
+  for (const f of state.floaters) {
+    const sel = document.getElementById('day_'+f.id);
+    if (!sel) continue;
+    if (sel.value !== 'auto') ov[f.id] = sel.value;
+  }
+  if (Object.keys(ov).length === 0) delete state.overrides[editingDate];
   else state.overrides[editingDate] = ov;
-  saveState(); render(); closeModal();
+  saveState(); render(); closeDayModal();
 }
 function clearDay() {
   delete state.overrides[editingDate];
-  saveState(); render(); closeModal();
+  saveState(); render(); closeDayModal();
 }
 
+// ============================================================
+// Team management modal
+// ============================================================
+let teamDraft = null;     // working copy while modal is open
+function openTeamModal() {
+  teamDraft = JSON.parse(JSON.stringify({ chatters: state.chatters, floaters: state.floaters }));
+  renderTeamModal();
+  document.getElementById('teamModalBg').classList.add('show');
+}
+function closeTeamModal(){ document.getElementById('teamModalBg').classList.remove('show'); teamDraft = null; }
+
+function renderTeamModal() {
+  const list = document.getElementById('teamList');
+  list.innerHTML = teamDraft.chatters.map((c, i) => `
+    <div class="chatter-row">
+      <div class="head">
+        <span class="dot" style="background:var(--c-${c.color})"></span>
+        <span class="name">${escapeHtml(c.name)}</span>
+        <button onclick="moveChatter(${i},-1)" ${i===0?'disabled':''}>↑</button>
+        <button onclick="moveChatter(${i},1)" ${i===teamDraft.chatters.length-1?'disabled':''}>↓</button>
+        <button class="danger" onclick="removeChatter(${i})">Remove</button>
+      </div>
+      <div class="grid">
+        <div><label>Name</label><input type="text" value="${escapeHtml(c.name)}" oninput="updateChatter(${i},'name',this.value)"></div>
+        <div><label>Color</label>${colorSelect(c.color, `updateChatter(${i},'color',this.value)`)}</div>
+        <div><label>Shift start (PHT, 24h)</label><input type="time" value="${escapeHtml(c.shift_pht.start)}" oninput="updateShift(${i},'start',this.value)"></div>
+        <div><label>Shift end (PHT, 24h)</label><input type="time" value="${escapeHtml(c.shift_pht.end)}" oninput="updateShift(${i},'end',this.value)"></div>
+        <div><label>Off day (PHT)</label>${dowSelect(c.off_dow_pht, `updateChatter(${i},'off_dow_pht',+this.value)`)}</div>
+        <div><label>Display label</label><input type="text" value="${escapeHtml(c.shift_pht.label)}" oninput="updateShiftLabel(${i},this.value)"></div>
+        <div><label>Start date</label><input type="date" value="${escapeHtml(c.start_date||'')}" oninput="updateChatter(${i},'start_date',this.value||null)"></div>
+        <div><label>End date (optional)</label><input type="date" value="${escapeHtml(c.end_date||'')}" oninput="updateChatter(${i},'end_date',this.value||null)"></div>
+        <div style="grid-column: span 2;"><label>Covered by floater (when off/vac)</label>${coveredBySelect(c.covered_by, `updateChatter(${i},'covered_by', this.value || null)`)}</div>
+      </div>
+    </div>
+  `).join('');
+
+  const flist = document.getElementById('floaterList');
+  flist.innerHTML = teamDraft.floaters.map((f, fi) => `
+    <div class="chatter-row">
+      <div class="head">
+        <span class="dot" style="background:var(--c-${f.color})"></span>
+        <input type="text" value="${escapeHtml(f.name)}" oninput="updateFloater(${fi},'name',this.value)" style="flex:1;">
+        ${colorSelect(f.color, `updateFloater(${fi},'color',this.value)`)}
+        <button class="danger" onclick="removeFloater(${fi})">Remove</button>
+      </div>
+      <div style="font-size:11px;color:#666;">This floater covers any chatter assigned to them when that chatter is off or on vacation.</div>
+    </div>
+  `).join('');
+}
+function coveredBySelect(current, onchange) {
+  return `<select onchange="${onchange}">` +
+    `<option value="" ${!current?'selected':''}>— nobody —</option>` +
+    teamDraft.floaters.map(f => `<option value="${f.id}" ${f.id===current?'selected':''}>${escapeHtml(f.name)}</option>`).join('') +
+    `</select>`;
+}
+
+function colorSelect(current, onchange) {
+  return `<select onchange="${onchange}">` +
+    COLOR_OPTIONS.map(c => `<option value="${c}" ${c===current?'selected':''}>${c}</option>`).join('') +
+    `</select>`;
+}
+function dowSelect(current, onchange) {
+  return `<select onchange="${onchange}">` +
+    [0,1,2,3,4,5,6].map(d => `<option value="${d}" ${d===current?'selected':''}>${dowName(d)}</option>`).join('') +
+    `</select>`;
+}
+function chatterIdSelect(current, onchange) {
+  return `<select onchange="${onchange}">` +
+    teamDraft.chatters.map(c => `<option value="${c.id}" ${c.id===current?'selected':''}>${escapeHtml(c.name)}</option>`).join('') +
+    `</select>`;
+}
+
+function updateChatter(i, key, val) { teamDraft.chatters[i][key] = val; }
+function updateShift(i, key, val) { teamDraft.chatters[i].shift_pht[key] = val; }
+function updateShiftLabel(i, val) { teamDraft.chatters[i].shift_pht.label = val; }
+function moveChatter(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= teamDraft.chatters.length) return;
+  const tmp = teamDraft.chatters[i];
+  teamDraft.chatters[i] = teamDraft.chatters[j];
+  teamDraft.chatters[j] = tmp;
+  renderTeamModal();
+}
+function removeChatter(i) {
+  if (!confirm(`Remove ${teamDraft.chatters[i].name}?`)) return;
+  teamDraft.chatters.splice(i,1);
+  renderTeamModal();
+}
+function addChatter() {
+  const id = 'chatter_' + Date.now();
+  const usedColors = new Set(teamDraft.chatters.map(c=>c.color).concat(teamDraft.floaters.map(f=>f.color)));
+  const color = COLOR_OPTIONS.find(c => !usedColors.has(c)) || COLOR_OPTIONS[0];
+  const defaultFloater = teamDraft.floaters[0]?.id || null;
+  teamDraft.chatters.push({
+    id, name:'New chatter', color,
+    shift_pht:{start:'08:00', end:'16:00', label:'8am–4pm'},
+    off_dow_pht: 0, start_date: new Date().toISOString().slice(0,10), end_date: null,
+    covered_by: defaultFloater,
+  });
+  renderTeamModal();
+}
+
+function updateFloater(fi, key, val) { teamDraft.floaters[fi][key] = val; }
+function addFloater() {
+  const id = 'floater_' + Date.now();
+  teamDraft.floaters.push({ id, name:'New floater', color:'floater' });
+  renderTeamModal();
+}
+function removeFloater(fi) {
+  if (!confirm(`Remove ${teamDraft.floaters[fi].name}?`)) return;
+  const removedId = teamDraft.floaters[fi].id;
+  teamDraft.chatters.forEach(c => { if (c.covered_by === removedId) c.covered_by = null; });
+  teamDraft.floaters.splice(fi,1);
+  renderTeamModal();
+}
+
+function saveTeam() {
+  const ids = new Set();
+  for (const c of teamDraft.chatters) {
+    if (!c.id || ids.has(c.id)) { alert('Chatter ids must be unique and non-empty'); return; }
+    ids.add(c.id);
+  }
+  state.chatters = teamDraft.chatters;
+  state.floaters = teamDraft.floaters;
+  saveState();
+  render();
+  closeTeamModal();
+}
+// ============================================================
+// Month overrides reset, import/export
+// ============================================================
 function resetMonth() {
-  if (!confirm(`Clear all overrides for ${monthName(state.month)} ${state.year}?`)) return;
+  if (!confirm(`Clear all overrides for ${monthName(state.view.month)} ${state.view.year}?`)) return;
   Object.keys(state.overrides).forEach(k=>{
-    if (k.startsWith(`${state.year}-${String(state.month).padStart(2,'0')}`)) delete state.overrides[k];
+    if (k.startsWith(`${state.view.year}-${String(state.view.month).padStart(2,'0')}`)) delete state.overrides[k];
   });
   saveState(); render();
 }
-function exportData() {
-  const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+
+// Strip cached fields before serialising
+function stateForExport() {
+  const clone = JSON.parse(JSON.stringify(state));
+  if (clone.chatters) clone.chatters.forEach(c => delete c._mst);
+  return clone;
+}
+function downloadDataJson() {
+  const blob = new Blob([JSON.stringify(stateForExport(), null, 2)], {type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'chatters_schedule.json';
+  a.download = 'data.json';
   a.click();
 }
 function importData(ev) {
@@ -474,72 +768,59 @@ function importData(ev) {
   if (!file) return;
   const r = new FileReader();
   r.onload = e => {
-    try { state = JSON.parse(e.target.result); saveState(); render(); }
-    catch(err){ alert('Invalid file'); }
+    try {
+      const parsed = JSON.parse(e.target.result);
+      if (!parsed.version || parsed.version < 2) {
+        if (!confirm('This looks like an old-format file. Convert and import? (Will use current default team)')) return;
+        const ds = defaultState();
+        ds.overrides = parsed.overrides || {};
+        if (parsed.year) ds.view.year = parsed.year;
+        if (parsed.month) ds.view.month = parsed.month;
+        state = ds;
+      } else {
+        state = parsed;
+      }
+      saveState(); render();
+    }
+    catch(err){ alert('Invalid file: ' + err.message); }
   };
   r.readAsText(file);
 }
 
+// ============================================================
+// Boot
+// ============================================================
 document.getElementById('prevMonth').onclick = ()=>{
-  state.month--; if (state.month<1){ state.month=12; state.year--; } saveState(); render();
+  state.view.month--; if (state.view.month<1){ state.view.month=12; state.view.year--; } saveState(); render();
 };
 document.getElementById('nextMonth').onclick = ()=>{
-  state.month++; if (state.month>12){ state.month=1; state.year++; } saveState(); render();
+  state.view.month++; if (state.view.month>12){ state.view.month=1; state.view.year++; } saveState(); render();
 };
 document.getElementById('viewMode').onchange = render;
-document.getElementById('modalBg').onclick = (e)=>{ if (e.target.id==='modalBg') closeModal(); };
-
-// Seed known April 2026 overrides on first load
-if (Object.keys(state.overrides).length===0) {
-  state.overrides = {
-    '2026-04-12': { m:'off-company' },   // Sun, keep Aji off (default Sun? no, default Sun only Moreno. Aji off is a special case here)
-  };
-  // Seed the full April 2026 schedule (per master PHT copy):
-  // defaults: Sun=Moreno off, Tue=Aji off, Thu=Ace off
-  state.overrides = {
-    '2026-04-12': { m:'off-company', a:'off' },    // Sun: Moreno off company cover, Aji off (Carlo)
-    '2026-04-14': { a:'work', c:'off' },           // Tue: Aji works, Ace off (Carlo)
-    '2026-04-16': { c:'work' },                    // Thu: Ace works (not off)
-    '2026-04-18': { a:'off' },                     // Sat: Aji off (Carlo)
-    '2026-04-19': { m:'vac' },                     // Sun: Moreno vacation
-    '2026-04-20': { m:'vac' },
-    '2026-04-21': { m:'vac', a:'work' },           // Tue: Moreno vac, Aji works
-    '2026-04-22': { m:'vac' },
-    '2026-04-23': { c:'work' },                    // Thu: Ace works (not off) — pay day
-    '2026-04-25': { c:'off' },                     // Sat: Ace off (Carlo)
-    '2026-04-26': { m:'work', a:'off' },           // Sun: Moreno works, Aji off (Carlo)
-    '2026-04-28': { m:'off', a:'work' },           // Tue: Moreno off (Carlo), Aji works
-  };
-  // Remove empty override entries
-  Object.keys(state.overrides).forEach(k=>{
-    if (Object.keys(state.overrides[k]).length===0) delete state.overrides[k];
-  });
-  // Set initial month to April 2026
-  state.year = 2026; state.month = 4;
-  saveState();
-}
+document.getElementById('dayModalBg').onclick = (e)=>{ if (e.target.id==='dayModalBg') closeDayModal(); };
+document.getElementById('teamModalBg').onclick = (e)=>{ if (e.target.id==='teamModalBg') closeTeamModal(); };
 
 render();
-restoreAutoSaveHandle();
 
-// ---- Auto-load published data.json (for GitHub Pages / hosted views) ----
-// If a data.json sits next to this HTML file, use it as the source of truth.
-// This lets you publish updates by replacing data.json in the repo — all
-// visitors will see your latest schedule on their next page load.
+// ============================================================
+// Auto-load published data.json (when hosted on GitHub Pages, etc.)
+// ============================================================
 (async function loadPublishedData() {
   try {
     const res = await fetch('./data.json', { cache: 'no-store' });
     if (!res.ok) return;
     const published = await res.json();
     if (!published || typeof published !== 'object') return;
+    if (!published.version || published.version < 2) return; // ignore old-format published file
+    // Use published as authoritative; cache locally
     state = published;
-    saveState();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     render();
+    document.getElementById('publishHint').style.display = 'none';
     const banner = document.createElement('div');
-    banner.className = 'no-print';
-    banner.style.cssText = 'background:#E8F4FD;border:1px solid #2E5A87;color:#2E5A87;padding:6px 12px;border-radius:4px;font-size:12px;margin-bottom:8px;';
-    banner.textContent = '✓ Viewing the published schedule — edits you make here will be overwritten on next page load.';
-    document.body.insertBefore(banner, document.getElementById('payBanner'));
+    banner.className = 'live-banner no-print';
+    banner.textContent = '✓ Showing the published schedule. Local edits stay in your browser until you Download data.json and update the repo.';
+    document.body.insertBefore(banner, document.getElementById('publishHint'));
   } catch(e) { /* no data.json — use local state */ }
 })();
 </script>
