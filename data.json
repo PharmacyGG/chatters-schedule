@@ -1,53 +1,94 @@
 {
-  "year": 2026,
-  "month": 5,
+  "version": 2,
+  "config": {
+    "project_start": "2026-04-10",
+    "pay_anchor": "2026-04-23",
+    "pay_cadence_days": 14,
+    "pay_offset_days": 4,
+    "commission_day_of_month": 5,
+    "pht_to_mst_offset_hours": -15
+  },
+  "view": {
+    "year": 2026,
+    "month": 5
+  },
+  "chatters": [
+    {
+      "id": "moreno",
+      "name": "Moreno",
+      "color": "moreno",
+      "shift_pht": {
+        "start": "16:00",
+        "end": "00:00",
+        "label": "4pm–12am"
+      },
+      "off_dow_pht": 0,
+      "start_date": "2026-04-10",
+      "end_date": null,
+      "covered_by": "carlo"
+    },
+    {
+      "id": "aji",
+      "name": "Aji",
+      "color": "aji",
+      "shift_pht": {
+        "start": "00:00",
+        "end": "08:00",
+        "label": "12am–8am"
+      },
+      "off_dow_pht": 2,
+      "start_date": "2026-04-10",
+      "end_date": null,
+      "covered_by": "carlo"
+    },
+    {
+      "id": "ace",
+      "name": "Ace",
+      "color": "ace",
+      "shift_pht": {
+        "start": "08:00",
+        "end": "16:00",
+        "label": "8am–4pm"
+      },
+      "off_dow_pht": 4,
+      "start_date": "2026-04-10",
+      "end_date": null,
+      "covered_by": "carlo"
+    },
+    {
+      "id": "jan",
+      "name": "Jan",
+      "color": "jan",
+      "shift_pht": {
+        "start": "00:00",
+        "end": "08:00",
+        "label": "12am–8am"
+      },
+      "off_dow_pht": 3,
+      "start_date": "2026-05-05",
+      "end_date": null,
+      "covered_by": "carlo"
+    }
+  ],
+  "floaters": [
+    {
+      "id": "carlo",
+      "name": "Carlo",
+      "color": "floater"
+    }
+  ],
   "overrides": {
-    "2026-04-12": {
-      "m": "off-company",
-      "a": "off"
+    "2026-05-06": {
+      "aji": "off",
+      "jan": "work"
     },
-    "2026-04-14": {
-      "a": "work",
-      "c": "off"
-    },
-    "2026-04-16": {
-      "c": "work"
-    },
-    "2026-04-18": {
-      "a": "off"
-    },
-    "2026-04-19": {
-      "m": "vac"
-    },
-    "2026-04-20": {
-      "m": "vac"
-    },
-    "2026-04-21": {
-      "m": "vac",
-      "a": "work"
-    },
-    "2026-04-22": {
-      "m": "vac"
-    },
-    "2026-04-23": {
-      "c": "work"
-    },
-    "2026-04-26": {
-      "m": "work",
-      "a": "off"
-    },
-    "2026-04-28": {
-      "m": "off",
-      "a": "work"
-    },
-    "2026-04-24": {
-      "c": "off"
+    "2026-05-05": {
+      "jan": "off",
+      "carlo": "cover:aji"
     },
     "2026-05-09": {
-      "c": "off"
-    },
-    "2026-05-07": {
-      "c": "work"
+      "ace": "off",
+      "carlo": "cover:ace"
     }
   }
 }
