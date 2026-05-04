@@ -80,15 +80,8 @@
   "overrides": {
     "2026-05-06": {
       "aji": "off",
-      "jan": "work"
-    },
-    "2026-05-05": {
-      "jan": "off",
-      "carlo": "cover:aji"
-    },
-    "2026-05-09": {
-      "ace": "off",
-      "carlo": "cover:ace"
+      "jan": "work",
+      "carlo": "off"
     }
   }
 }
