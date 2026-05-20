@@ -136,7 +136,7 @@
   <div class="modal" style="width:560px;">
     <h3>Manage team</h3>
     <p style="font-size:12px; color:#666; margin:0 0 10px;">
-      Add or remove chatters, change shifts/off-days, and set start/end dates. Default rotations apply automatically â overrides handle exceptions.
+      Add or remove chatters, change shifts/off-days, and set start/end dates. Default rotations apply automatically — overrides handle exceptions.
     </p>
     <div id="teamList"></div>
     <button onclick="addChatter()" style="margin-top:8px;">+ Add chatter</button>
@@ -156,7 +156,7 @@
 
 <script>
 // ============================================================
-// CHATTERS SCHEDULE DASHBOARD v2 â team-aware, data.json driven
+// CHATTERS SCHEDULE DASHBOARD v2 — team-aware, data.json driven
 // ============================================================
 const STORAGE_KEY = 'chatters_schedule_v5';
 const COLOR_OPTIONS = ['moreno','aji','ace','jan','teal','pink','yellow','coral','slate','mint'];
@@ -176,19 +176,19 @@ function defaultState() {
     view: { year: 2026, month: 5 },
     chatters: [
       { id:'moreno', name:'Moreno', color:'moreno',
-        shift_pht:{start:'16:00', end:'00:00', label:'4pmâ12am'},
+        shift_pht:{start:'16:00', end:'00:00', label:'4pm–12am'},
         off_dow_pht:0, start_date:'2026-04-10', end_date:null,
         covered_by:'carlo' },
       { id:'aji', name:'Aji', color:'aji',
-        shift_pht:{start:'00:00', end:'08:00', label:'12amâ8am'},
+        shift_pht:{start:'00:00', end:'08:00', label:'12am–8am'},
         off_dow_pht:2, start_date:'2026-04-10', end_date:null,
         covered_by:'carlo' },
       { id:'ace', name:'Ace', color:'ace',
-        shift_pht:{start:'08:00', end:'16:00', label:'8amâ4pm'},
+        shift_pht:{start:'08:00', end:'16:00', label:'8am–4pm'},
         off_dow_pht:4, start_date:'2026-04-10', end_date:null,
         covered_by:'carlo' },
       { id:'jan', name:'Jan', color:'jan',
-        shift_pht:{start:'00:00', end:'08:00', label:'12amâ8am'},
+        shift_pht:{start:'00:00', end:'08:00', label:'12am–8am'},
         off_dow_pht:3, start_date:'2026-05-05', end_date:null,
         covered_by:'carlo' },
     ],
@@ -235,7 +235,7 @@ function dowName(dow) {
 }
 
 // ============================================================
-// Shift helpers â derive MST shift + date offset from PHT shift
+// Shift helpers — derive MST shift + date offset from PHT shift
 // ============================================================
 function parseHHMM(s) { const [h,m] = s.split(':').map(Number); return h*60 + (m||0); }
 function fmt12h(min) {
@@ -245,7 +245,7 @@ function fmt12h(min) {
   return `${h12}${m?':'+String(m).padStart(2,'0'):''}${ampm}`;
 }
 function shiftRangeLabel(startMin, endMin) {
-  return `${fmt12h(startMin)}â${fmt12h(endMin)}`;
+  return `${fmt12h(startMin)}–${fmt12h(endMin)}`;
 }
 // Convert PHT shift to MST: shift hours backward by 15h â may roll into previous MST date
 function mstShiftFor(chatter) {
@@ -381,13 +381,13 @@ function phtCellPills(dateStr, team) {
     if (st === 'work') {
       pills.push(pillHTML(`${c.name} ${c.shift_pht.label}`, c.color));
     } else if (st === 'vac') {
-      pills.push(pillHTML(`${c.name} â vacation`, 'vac'));
+      pills.push(pillHTML(`${c.name} — vacation`, 'vac'));
       hasVac = true;
     } else if (st === 'off-company') {
       pills.push(pillHTML(`Company cover ${c.shift_pht.label}`, 'company'));
-      pills.push(pillHTML(`${c.name} â off`, 'off'));
+      pills.push(pillHTML(`${c.name} — off`, 'off'));
     } else {
-      pills.push(pillHTML(`${c.name} â off`, 'off'));
+      pills.push(pillHTML(`${c.name} — off`, 'off'));
     }
   }
   // Floater coverage: show events for any floater, but only when the COVERED chatter belongs to this team.
@@ -396,7 +396,7 @@ function phtCellPills(dateStr, team) {
     for (const k of events) {
       const target = state.chatters.find(c => c.id === k.covers_id);
       if (team && target && teamOf(target) !== team) continue;
-      pills.push(pillHTML(`${f.name} â ${k.shift_pht_label}`, f.color));
+      pills.push(pillHTML(`${f.name} — ${k.shift_pht_label}`, f.color));
     }
   }
   return { pills, hasVac };
@@ -415,13 +415,13 @@ function mstCellPills(dateStr, team) {
     if (st === 'work') {
       pills.push(pillHTML(`${c.name} ${info.label}`, c.color));
     } else if (st === 'vac') {
-      pills.push(pillHTML(`${c.name} â vacation`, 'vac'));
+      pills.push(pillHTML(`${c.name} — vacation`, 'vac'));
       hasVac = true;
     } else if (st === 'off-company') {
       pills.push(pillHTML(`Company cover ${info.label}`, 'company'));
-      pills.push(pillHTML(`${c.name} â off`, 'off'));
+      pills.push(pillHTML(`${c.name} — off`, 'off'));
     } else {
-      pills.push(pillHTML(`${c.name} â off`, 'off'));
+      pills.push(pillHTML(`${c.name} — off`, 'off'));
     }
   }
   for (const f of state.floaters) {
@@ -434,7 +434,7 @@ function mstCellPills(dateStr, team) {
         if (team && teamOf(target) !== team) continue;
         const info = chatterMstInfo(target);
         if (addDays(phtDate, info.dateShift) !== dateStr) continue;
-        pills.push(pillHTML(`${f.name} â ${info.label}`, f.color));
+        pills.push(pillHTML(`${f.name} — ${info.label}`, f.color));
       }
     }
   }
@@ -533,7 +533,7 @@ function render() {
   }
   document.getElementById('payBanner').innerHTML = [...periods].map(p=>{
     const [s,e,pd] = p.split('|');
-    return `Pay Period: ${fmtHuman(s)} â ${fmtHuman(e)} &nbsp;|&nbsp; Pay Date: ${fmtHuman(pd)}`;
+    return `Pay Period: ${fmtHuman(s)} – ${fmtHuman(e)} &nbsp;|&nbsp; Pay Date: ${fmtHuman(pd)}`;
   }).join('<br>');
 
   renderLegend();
@@ -546,23 +546,23 @@ function render() {
   for (const team of teams) {
     html += `<div style="grid-column: 1 / -1; margin: 12px 0 4px;"><div style="font-size:14px; font-weight:600; margin-bottom:6px;">Team ${team}</div><div style="display:flex; flex-wrap:wrap; gap:6px;">${teamLegendHTML(team)}</div></div>`;
     if (view==='both' || view==='pht') {
-      html += `<div class="cal"><h2>Team ${team} â PHT <small>(UTC+8)</small></h2>${buildCalendar('pht', team)}</div>`;
+      html += `<div class="cal"><h2>Team ${team} — PHT <small>(UTC+8)</small></h2>${buildCalendar('pht', team)}</div>`;
     }
     if (view==='both' || view==='mst') {
-      html += `<div class="cal"><h2>Team ${team} â MST <small>(UTC-7)</small></h2>${buildCalendar('mst', team)}</div>`;
+      html += `<div class="cal"><h2>Team ${team} — MST <small>(UTC-7)</small></h2>${buildCalendar('mst', team)}</div>`;
     }
   }
   container.innerHTML = html;
 }
 // ============================================================
-// Day-edit modal â dynamic per chatter + floater
+// Day-edit modal — dynamic per chatter + floater
 // ============================================================
 let editingDate = null;
 function openDayModal(dateStr) {
   editingDate = dateStr;
   const dow = dowOf(dateStr);
   const rows = [];
-  rows.push(`<p style="font-size:12px; color:#666; margin:0 0 8px;">${escapeHtml(fmtHuman(dateStr))} (${dowName(dow)}) â PHT</p>`);
+  rows.push(`<p style="font-size:12px; color:#666; margin:0 0 8px;">${escapeHtml(fmtHuman(dateStr))} (${dowName(dow)}) — PHT</p>`);
   for (const c of state.chatters) {
     if (!chatterIsActive(c, dateStr)) continue;
     const cur = statusFor(c, dateStr);
@@ -574,7 +574,7 @@ function openDayModal(dateStr) {
           <option value="work" ${cur==='work'?'selected':''}>Works ${escapeHtml(c.shift_pht.label)}</option>
           <option value="off" ${cur==='off'?'selected':''}>Off</option>
           <option value="vac" ${cur==='vac'?'selected':''}>Vacation</option>
-          <option value="off-company" ${cur==='off-company'?'selected':''}>Off â company cover</option>
+          <option value="off-company" ${cur==='off-company'?'selected':''}>Off — company cover</option>
           <option value="hidden" ${cur==='hidden'?'selected':''}>Not scheduled (hide)</option>
         </select>
         <span style="font-size:10px;color:#999;margin-left:6px;">default: ${def}</span>
@@ -590,7 +590,7 @@ function openDayModal(dateStr) {
       // Build options
       const opts = [
         `<option value="auto" ${cur==='auto'?'selected':''}>Auto (default)</option>`,
-        `<option value="off" ${cur==='off'?'selected':''}>Off â no coverage</option>`,
+        `<option value="off" ${cur==='off'?'selected':''}>Off — no coverage</option>`,
       ];
       for (const c of state.chatters) {
         if (!chatterIsActive(c, dateStr)) continue;
@@ -699,7 +699,7 @@ function teamSelect(current, onchange) {
 }
 function coveredBySelect(current, onchange) {
   return `<select onchange="${onchange}">` +
-    `<option value="" ${!current?'selected':''}>â nobody â</option>` +
+    `<option value="" ${!current?'selected':''}>— nobody —</option>` +
     teamDraft.floaters.map(f => `<option value="${f.id}" ${f.id===current?'selected':''}>${escapeHtml(f.name)}</option>`).join('') +
     `</select>`;
 }
@@ -743,7 +743,7 @@ function addChatter() {
   const defaultFloater = teamDraft.floaters[0]?.id || null;
   teamDraft.chatters.push({
     id, name:'New chatter', color,
-    shift_pht:{start:'08:00', end:'16:00', label:'8amâ4pm'},
+    shift_pht:{start:'08:00', end:'16:00', label:'8am–4pm'},
     off_dow_pht: 0, start_date: new Date().toISOString().slice(0,10), end_date: null,
     covered_by: defaultFloater,
   });
@@ -858,7 +858,7 @@ render();
     banner.className = 'live-banner no-print';
     banner.textContent = 'â Showing the published schedule. Local edits stay in your browser until you Download data.json and update the repo.';
     document.body.insertBefore(banner, document.getElementById('publishHint'));
-  } catch(e) { /* no data.json â use local state */ }
+  } catch(e) { /* no data.json — use local state */ }
 })();
 </script>
 </body>
