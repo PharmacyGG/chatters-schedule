@@ -100,6 +100,10 @@
     <option value="pht">PHT only</option>
     <option value="mst">MST only</option>
   </select>
+  <select id="layoutMode" title="Calendar layout">
+    <option value="split">Split per team</option>
+    <option value="combined">Combined</option>
+  </select>
   <button onclick="openTeamModal()">Manage team</button>
   <button class="primary" onclick="downloadDataJson()">Download data.json</button>
   <button onclick="document.getElementById('importFile').click()">Import data.json</button>
@@ -247,7 +251,7 @@ function fmt12h(min) {
 function shiftRangeLabel(startMin, endMin) {
   return `${fmt12h(startMin)}–${fmt12h(endMin)}`;
 }
-// Convert PHT shift to MST: shift hours backward by 15h â may roll into previous MST date
+// Convert PHT shift to MST: shift hours backward by 15h → may roll into previous MST date
 function mstShiftFor(chatter) {
   const startPHT = parseHHMM(chatter.shift_pht.start);
   const endPHT = parseHHMM(chatter.shift_pht.end);
@@ -293,9 +297,9 @@ function statusFor(chatter, dateStr) {
 }
 
 // Floater overrides per day:
-//   undefined / 'auto'    â cover any chatter who is off/vac AND has covered_by===this floater
-//   'off'                 â no coverage today, even if a chatter is off
-//   'cover:<chatter_id>'  â cover that chatter's shift today regardless of their status
+//   undefined / 'auto'    → cover any chatter who is off/vac AND has covered_by===this floater
+//   'off'                 → no coverage today, even if a chatter is off
+//   'cover:<chatter_id>'  → cover that chatter's shift today regardless of their status
 function floaterOverrideFor(floater, dateStr) {
   return (state.overrides[dateStr] || {})[floater.id] || 'auto';
 }
@@ -539,17 +543,31 @@ function render() {
   renderLegend();
 
   const view = document.getElementById('viewMode').value;
+  const layout = (document.getElementById('layoutMode')?.value) || 'split';
   const container = document.getElementById('calendars');
   container.className = 'calendars' + (view==='both' ? '' : ' single');
   let html = '';
-  const teams = allTeams();
-  for (const team of teams) {
-    html += `<div style="grid-column: 1 / -1; margin: 12px 0 4px;"><div style="font-size:14px; font-weight:600; margin-bottom:6px;">Team ${team}</div><div style="display:flex; flex-wrap:wrap; gap:6px;">${teamLegendHTML(team)}</div></div>`;
+  if (layout === 'combined') {
+    const items = [];
+    for (const c of state.chatters) items.push(`<span class="pill" style="${pillStyle(c.color)}">${escapeHtml(c.name)} ${escapeHtml(c.shift_pht.label)} PHT</span>`);
+    for (const f of state.floaters) items.push(`<span class="pill" style="${pillStyle(f.color)}">${escapeHtml(f.name)} (floater)</span>`);
+    html += `<div style="grid-column: 1 / -1; margin: 12px 0 4px;"><div style="display:flex; flex-wrap:wrap; gap:6px;">${items.join(' ')}</div></div>`;
     if (view==='both' || view==='pht') {
-      html += `<div class="cal"><h2>Team ${team} — PHT <small>(UTC+8)</small></h2>${buildCalendar('pht', team)}</div>`;
+      html += `<div class="cal"><h2>PHT <small>(UTC+8) — all teams combined</small></h2>${buildCalendar('pht', null)}</div>`;
     }
     if (view==='both' || view==='mst') {
-      html += `<div class="cal"><h2>Team ${team} — MST <small>(UTC-7)</small></h2>${buildCalendar('mst', team)}</div>`;
+      html += `<div class="cal"><h2>MST <small>(UTC-7) — all teams combined</small></h2>${buildCalendar('mst', null)}</div>`;
+    }
+  } else {
+    const teams = allTeams();
+    for (const team of teams) {
+      html += `<div style="grid-column: 1 / -1; margin: 12px 0 4px;"><div style="font-size:14px; font-weight:600; margin-bottom:6px;">Team ${team}</div><div style="display:flex; flex-wrap:wrap; gap:6px;">${teamLegendHTML(team)}</div></div>`;
+      if (view==='both' || view==='pht') {
+        html += `<div class="cal"><h2>Team ${team} — PHT <small>(UTC+8)</small></h2>${buildCalendar('pht', team)}</div>`;
+      }
+      if (view==='both' || view==='mst') {
+        html += `<div class="cal"><h2>Team ${team} — MST <small>(UTC-7)</small></h2>${buildCalendar('mst', team)}</div>`;
+      }
     }
   }
   container.innerHTML = html;
@@ -651,8 +669,8 @@ function renderTeamModal() {
       <div class="head">
         <span class="dot" style="background:var(--c-${c.color})"></span>
         <span class="name">${escapeHtml(c.name)}</span>
-        <button onclick="moveChatter(${i},-1)" ${i===0?'disabled':''}>â</button>
-        <button onclick="moveChatter(${i},1)" ${i===teamDraft.chatters.length-1?'disabled':''}>â</button>
+        <button onclick="moveChatter(${i},-1)" ${i===0?'disabled':''}>↑</button>
+        <button onclick="moveChatter(${i},1)" ${i===teamDraft.chatters.length-1?'disabled':''}>↓</button>
         <button class="danger" onclick="removeChatter(${i})">Remove</button>
       </div>
       <div class="grid">
@@ -834,6 +852,12 @@ document.getElementById('nextMonth').onclick = ()=>{
   state.view.month++; if (state.view.month>12){ state.view.month=1; state.view.year++; } saveState(); render();
 };
 document.getElementById('viewMode').onchange = render;
+const _layoutSel = document.getElementById('layoutMode');
+if (_layoutSel) {
+  const saved = localStorage.getItem('chatters_layout');
+  if (saved === 'combined' || saved === 'split') _layoutSel.value = saved;
+  _layoutSel.onchange = () => { localStorage.setItem('chatters_layout', _layoutSel.value); render(); };
+}
 document.getElementById('dayModalBg').onclick = (e)=>{ if (e.target.id==='dayModalBg') closeDayModal(); };
 document.getElementById('teamModalBg').onclick = (e)=>{ if (e.target.id==='teamModalBg') closeTeamModal(); };
 
@@ -856,7 +880,7 @@ render();
     document.getElementById('publishHint').style.display = 'none';
     const banner = document.createElement('div');
     banner.className = 'live-banner no-print';
-    banner.textContent = 'â Showing the published schedule. Local edits stay in your browser until you Download data.json and update the repo.';
+     banner.textContent = '✓ Showing the published schedule. Local edits stay in your browser until you Download data.json and update the repo.';
     document.body.insertBefore(banner, document.getElementById('publishHint'));
   } catch(e) { /* no data.json — use local state */ }
 })();
