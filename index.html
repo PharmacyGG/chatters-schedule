@@ -176,6 +176,7 @@ function defaultState() {
       pay_offset_days: 4,        // pay date is N days after period end
       commission_day_of_month: 5,
       pht_to_mst_offset_hours: -15,
+      max_months_ahead: 3,        // cap navigation at today + N months
     },
     view: { year: 2026, month: 5 },
     chatters: [
@@ -845,10 +846,30 @@ function importData(ev) {
 // ============================================================
 // Boot
 // ============================================================
+function maxViewableYM() {
+  const ahead = (state.config && state.config.max_months_ahead != null) ? state.config.max_months_ahead : 3;
+  const now = new Date();
+  let y = now.getFullYear(), m = now.getMonth() + 1 + ahead;
+  while (m > 12) { m -= 12; y += 1; }
+  return { year: y, month: m };
+}
+function canGoForward() {
+  const max = maxViewableYM();
+  if (state.view.year < max.year) return true;
+  if (state.view.year === max.year && state.view.month < max.month) return true;
+  return false;
+}
+function updateNextBtnState() {
+  const btn = document.getElementById('nextMonth');
+  if (btn) btn.disabled = !canGoForward();
+}
+const _origRender = render;
+render = function() { _origRender(); updateNextBtnState(); };
 document.getElementById('prevMonth').onclick = ()=>{
   state.view.month--; if (state.view.month<1){ state.view.month=12; state.view.year--; } saveState(); render();
 };
 document.getElementById('nextMonth').onclick = ()=>{
+  if (!canGoForward()) return;
   state.view.month++; if (state.view.month>12){ state.view.month=1; state.view.year++; } saveState(); render();
 };
 document.getElementById('viewMode').onchange = render;
@@ -872,15 +893,14 @@ render();
     if (!res.ok) return;
     const published = await res.json();
     if (!published || typeof published !== 'object') return;
-    if (!published.version || published.version < 2) return; // ignore old-format published file
-    // Use published as authoritative; cache locally
+    if (!published.version || published.version < 2) return;
     state = published;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     render();
     document.getElementById('publishHint').style.display = 'none';
     const banner = document.createElement('div');
     banner.className = 'live-banner no-print';
-     banner.textContent = '✓ Showing the published schedule. Local edits stay in your browser until you Download data.json and update the repo.';
+    banner.textContent = '✓ Showing the published schedule. Local edits stay in your browser until you Download data.json and update the repo.';
     document.body.insertBefore(banner, document.getElementById('publishHint'));
   } catch(e) { /* no data.json — use local state */ }
 })();
