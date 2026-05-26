@@ -287,6 +287,24 @@ function chatterIsActive(c, dateStr) {
   if (c.end_date && dateStr > c.end_date) return false;
   return true;
 }
+function floaterIsActive(f, dateStr) {
+  if (f.start_date && dateStr < f.start_date) return false;
+  if (f.end_date && dateStr > f.end_date) return false;
+  return true;
+}
+// Pick which floater is covering chatter c on dateStr.
+// Supports c.covered_by_changes = [{ from_date: 'YYYY-MM-DD', floater_id: '...' }, ...].
+// Picks the latest entry whose from_date <= dateStr; falls back to c.covered_by.
+function resolveCoveredBy(c, dateStr) {
+  const changes = Array.isArray(c.covered_by_changes) ? c.covered_by_changes : null;
+  if (changes && changes.length) {
+    const applicable = changes
+      .filter(ch => ch && ch.from_date && ch.from_date <= dateStr)
+      .sort((a, b) => a.from_date < b.from_date ? -1 : a.from_date > b.from_date ? 1 : 0);
+    if (applicable.length) return applicable[applicable.length - 1].floater_id;
+  }
+  return c.covered_by;
+}
 function defaultStatusFor(chatter, dateStr) {
   const dow = dowOf(dateStr);
   if (dow === chatter.off_dow_pht) return 'off';
@@ -307,8 +325,9 @@ function floaterOverrideFor(floater, dateStr) {
 
 // Returns the PHT-date coverage events for a single floater.
 function coverageForFloater(floater, dateStr) {
-  const ovr = floaterOverrideFor(floater, dateStr);
   const out = [];
+  if (!floaterIsActive(floater, dateStr)) return out;
+  const ovr = floaterOverrideFor(floater, dateStr);
   if (ovr === 'off') return out;
   if (typeof ovr === 'string' && ovr.startsWith('cover:')) {
     const targetId = ovr.slice('cover:'.length);
@@ -321,10 +340,10 @@ function coverageForFloater(floater, dateStr) {
     });
     return out;
   }
-  // auto: walk chatters this floater is assigned to cover
+  // auto: walk chatters this floater is assigned to cover (honors covered_by_changes)
   for (const c of state.chatters) {
     if (!chatterIsActive(c, dateStr)) continue;
-    if (c.covered_by !== floater.id) continue;
+    if (resolveCoveredBy(c, dateStr) !== floater.id) continue;
     const st = statusFor(c, dateStr);
     if (st === 'hidden') continue;
     if (st !== 'off' && st !== 'vac') continue;
@@ -885,25 +904,4 @@ document.getElementById('teamModalBg').onclick = (e)=>{ if (e.target.id==='teamM
 render();
 
 // ============================================================
-// Auto-load published data.json (when hosted on GitHub Pages, etc.)
-// ============================================================
-(async function loadPublishedData() {
-  try {
-    const res = await fetch('./data.json', { cache: 'no-store' });
-    if (!res.ok) return;
-    const published = await res.json();
-    if (!published || typeof published !== 'object') return;
-    if (!published.version || published.version < 2) return;
-    state = published;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    render();
-    document.getElementById('publishHint').style.display = 'none';
-    const banner = document.createElement('div');
-    banner.className = 'live-banner no-print';
-    banner.textContent = '✓ Showing the published schedule. Local edits stay in your browser until you Download data.json and update the repo.';
-    document.body.insertBefore(banner, document.getElementById('publishHint'));
-  } catch(e) { /* no data.json — use local state */ }
-})();
-</script>
-</body>
-</html>
+// Auto-load published data.json (when hosted on GitHub
