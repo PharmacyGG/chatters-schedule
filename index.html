@@ -905,3 +905,25 @@ render();
 
 // ============================================================
 // Auto-load published data.json (when hosted on GitHub
+// Auto-load published data.json (when hosted on GitHub Pages, etc.)
+// ============================================================
+(async function loadPublishedData() {
+  try {
+    const res = await fetch('./data.json', { cache: 'no-store' });
+    if (!res.ok) return;
+    const published = await res.json();
+    if (!published || typeof published !== 'object') return;
+    if (!published.version || published.version < 2) return;
+    state = published;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    render();
+    document.getElementById('publishHint').style.display = 'none';
+    const banner = document.createElement('div');
+    banner.className = 'live-banner no-print';
+    banner.textContent = 'Showing the published schedule. Local edits stay in your browser until you Download data.json and update the repo.';
+    document.body.insertBefore(banner, document.getElementById('publishHint'));
+  } catch(e) { /* no data.json - use local state */ }
+})();
+</script>
+</body>
+</html>
